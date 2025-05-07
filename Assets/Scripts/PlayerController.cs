@@ -26,16 +26,6 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
 
-        if (transform.localScale.x < 0 || transform.localScale.y < 0 || transform.localScale.z < 0)
-        {
-            Debug.LogWarning("Corrigiendo escala negativa en el astronauta");
-            transform.localScale = new Vector3(
-                Mathf.Abs(transform.localScale.x),
-                Mathf.Abs(transform.localScale.y),
-                Mathf.Abs(transform.localScale.z)
-            );
-        }
-
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         rb.drag = 0.7f; 
@@ -71,7 +61,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void HandleArtificialGravity() // Fuerza de gravedad 
+    void HandleArtificialGravity() 
     {
         if (isGrounded)
         {
@@ -138,3 +128,4 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
+

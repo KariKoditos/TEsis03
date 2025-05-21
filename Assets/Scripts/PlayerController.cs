@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         CheckGround();
-        HandleArtificialGravity();
+        //HandleArtificialGravity();
         HandleMovement();
         LimitVelocity();
     }
@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /*
     void HandleArtificialGravity() 
     {
         if (isGrounded)
@@ -71,6 +72,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    */
+
     void HandleMovement()
     {
         Vector3 moveDirection = Vector3.zero;
@@ -80,6 +83,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D)) moveDirection += cameraTransform.right;
         if (Input.GetKey(KeyCode.A)) moveDirection -= cameraTransform.right;
 
+        
         // Movimiento solo si está cerca del suelo o con fuerza reducida
         float moveMultiplier = isGrounded ? 1f : 0.3f;
         
@@ -94,6 +98,7 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(-rb.velocity * currentBraking * Time.fixedDeltaTime, ForceMode.VelocityChange);
         }
     }
+        
 
     void HandleCamera()
     {
@@ -128,4 +133,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
+
+    
 

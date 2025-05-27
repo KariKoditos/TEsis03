@@ -2,41 +2,25 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Transform player;
-    public float distance = 5f;
-    public float height = 2f;
-    public float rotationDamping = 3f;
-    public float heightDamping = 2f;
+    public Transform cuerpoJugador; // El objeto del jugador
+    public float sensibilidad = 100f;
 
-    void LateUpdate()
+    float rotacionX = 0f;
+
+    void Start()
     {
-        if (!player) return;
+        Cursor.lockState = CursorLockMode.Locked; // Oculta el cursor
+    }
 
-        // Calcular la rotación deseada
-        float wantedRotationAngle = player.eulerAngles.y;
-        float wantedHeight = player.position.y + height;
+    void Update()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * sensibilidad * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * sensibilidad * Time.deltaTime;
 
-        // Posición actual de la cámara
-        float currentRotationAngle = transform.eulerAngles.y;
-        float currentHeight = transform.position.y;
+        rotacionX -= mouseY;
+        rotacionX = Mathf.Clamp(rotacionX, -90f, 90f); // Evita rotación extrema
 
-        // Suavizar la rotación
-        currentRotationAngle = Mathf.LerpAngle(currentRotationAngle, wantedRotationAngle, rotationDamping * Time.deltaTime);
-
-        // Suavizar la altura
-        currentHeight = Mathf.Lerp(currentHeight, wantedHeight, heightDamping * Time.deltaTime);
-
-        // Convertir ángulo a rotación
-        Quaternion currentRotation = Quaternion.Euler(0, currentRotationAngle, 0);
-
-        // Posicionar la cámara detrás del jugador
-        transform.position = player.position;
-        transform.position -= currentRotation * Vector3.forward * distance;
-
-        // Ajustar altura
-        transform.position = new Vector3(transform.position.x, currentHeight, transform.position.z);
-
-        // Mirar siempre al jugador
-        transform.LookAt(player);
+        transform.localRotation = Quaternion.Euler(rotacionX, 0f, 0f);
+        cuerpoJugador.Rotate(Vector3.up * mouseX);
     }
 }

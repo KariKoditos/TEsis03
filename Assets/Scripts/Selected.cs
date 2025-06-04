@@ -6,7 +6,7 @@ using UnityEngine;
 public class Selected : MonoBehaviour
 {
     LayerMask mask;
-    public float distancia = 1.5f;
+    public float distancia = 2.5f;
 
     public Texture2D puntero;
     public GameObject TextDetect;
@@ -15,7 +15,7 @@ public class Selected : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        mask = LayerMask.GetMask("Raycast Detect");
+        mask = LayerMask.GetMask("RayCast Detect");
         TextDetect.SetActive(false);
     }
 
@@ -27,10 +27,11 @@ public class Selected : MonoBehaviour
         if(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit,distancia,mask))
         {
             Deselect();
-            SelectedObject(hit.transform);  
+            SelectedObject(hit.transform);
+            Debug.Log("Siento cosas de chava");
 
 
-            if( hit.collider.tag == "Objeto Intereactivo")
+            if( hit.collider.tag == "Objeto Interactivo")
             {
                 if(Input.GetKeyDown(KeyCode.E))
                 {

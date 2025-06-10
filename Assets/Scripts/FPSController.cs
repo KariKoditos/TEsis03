@@ -11,6 +11,7 @@ public class FPSController : MonoBehaviour
     public float runSpeed = 10.0f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
+    public bool puedeMoverse = true;
 
     [Header("Opciones de Camara")]
     public Camera cam;
@@ -33,6 +34,10 @@ public class FPSController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (!puedeMoverse)
+            return;
+
         h_mouse = mouseHorizontal * Input.GetAxis("Mouse X");
         v_mouse += mouseVertical * Input.GetAxis("Mouse Y");
 

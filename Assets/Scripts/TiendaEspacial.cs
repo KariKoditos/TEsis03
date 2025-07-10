@@ -8,28 +8,19 @@ public class TiendaEspacial : MonoBehaviour
     public JugadorFinanzas jugador;
     public TMP_Text textoCreditos;
     public ItemEspacial[] itemsEnVenta;
-    public Transform contenedorBotones;
     public GameObject botonPrefab;
+    public FPSController controladorJugador;
 
-    
+
 
     void Start()
     {
         panelTienda.SetActive(false);
         ActualizarCreditos();
-        GenerarBotones();
+        
     }
 
-    void GenerarBotones()
-    {
-        foreach (ItemEspacial item in itemsEnVenta)
-        {
-            GameObject boton = Instantiate(botonPrefab, contenedorBotones);
-            boton.GetComponentInChildren<Text>().text = $"{item.nombre} - ${item.costo}";
-            boton.GetComponent<Button>().onClick.AddListener(() => Comprar(item));
-        }
-    }
-
+   
     public void Comprar(ItemEspacial item)
     {
         jugador.Comprar(item);
@@ -42,6 +33,7 @@ public class TiendaEspacial : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0;
+        controladorJugador.habilitarMovimiento = false;
     }
 
     public void CerrarTienda()
@@ -50,6 +42,7 @@ public class TiendaEspacial : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Time.timeScale = 1;
+        controladorJugador.habilitarMovimiento = true;
     }
 
     void ActualizarCreditos()

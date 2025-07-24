@@ -27,14 +27,14 @@ public class JugadorFinanzas : MonoBehaviour
         {
             creditos -= item.costo;
             inventario.Add(item);
-            Debug.Log($" Compraste: {item.nombre}. Créditos restantes: {creditos}");
+            Debug.Log(" Compraste: {item.nombre}. Créditos restantes: {creditos}");
 
             UIManager.instancia.ActualizarCreditos(creditos);
             UIManager.instancia.ActualizarInventarioUI(inventario);
         }
         else
         {
-            Debug.Log(" No tienes suficientes créditos");
+            Debug.Log("No tienes suficientes créditos");
         }
     }
 

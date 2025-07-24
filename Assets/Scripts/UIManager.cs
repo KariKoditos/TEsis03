@@ -1,81 +1,123 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager instancia;
 
     [Header("UI General")]
-    public TMP_Text textoCreditos;       // Texto de créditos
-    public GameObject canvasTienda;      // Canvas completo de la tienda
+    public TMP_Text textoCreditos;        // Texto para créditos
+    public GameObject canvasTienda;       // Panel completo de la tienda
 
-    [Header("UI Inventario")]
-    public Transform contenedorInventario;   // Donde aparecerán los items
-    public GameObject prefabItemInventario;
+    [Header("Inventario")]
+    public GameObject panelInventario;    // Panel de inventario
+    public TMP_Text[] textosSlots;        // Textos de los 5 botones de inventario
+
+    [Header("Jugador")]
+    public FPSController controladorJugador;
+
+    private bool inventarioAbierto = false;
 
     private void Awake()
     {
         if (instancia == null)
-        {
             instancia = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
     }
 
     private void Start()
     {
         if (canvasTienda != null)
-            canvasTienda.SetActive(false); // Aseguramos que esté apagado al inicio
+            canvasTienda.SetActive(false);
+
+        if (panelInventario != null)
+            panelInventario.SetActive(false);
 
         ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
     }
 
+    private void Update()
+    {
+        // Alternar Inventario con la tecla "I"
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            ToggleInventario();
+        }
+    }
+
+    // --- Créditos ---
     public void ActualizarCreditos(int cantidad)
     {
         if (textoCreditos != null)
-        {
             textoCreditos.text = $"CRÉDITOS: {cantidad}";
+    }
+
+    // --- Inventario ---
+    public void ActualizarInventarioUI(List<ItemEspacial> inventario)
+    {
+        for (int i = 0; i < textosSlots.Length; i++)
+        {
+            if (i < inventario.Count)
+                textosSlots[i].text = inventario[i].nombre;
+            else
+                textosSlots[i].text = "- Vacío -";
         }
     }
 
-    // Métodos para manejar el Canvas de la tienda
+    public void VenderSlot(int slotIndex)
+    {
+        JugadorFinanzas.instancia.Vender(slotIndex);
+    }
+
+    public void ToggleInventario()
+    {
+        inventarioAbierto = !inventarioAbierto;
+        panelInventario.SetActive(inventarioAbierto);
+
+        if (inventarioAbierto)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            Time.timeScale = 0f;
+            if (controladorJugador != null)
+                controladorJugador.habilitarMovimiento = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            Time.timeScale = 1f;
+            if (controladorJugador != null)
+                controladorJugador.habilitarMovimiento = true;
+        }
+    }
+
+    // --- Tienda ---
     public void MostrarTienda()
     {
         if (canvasTienda != null)
-        {
             canvasTienda.SetActive(true);
-            Debug.Log("Canvas de tienda activado desde UIManager");
-        }
     }
 
     public void OcultarTienda()
     {
         if (canvasTienda != null)
-        {
             canvasTienda.SetActive(false);
-            Debug.Log("Canvas de tienda desactivado desde UIManager");
-        }
     }
 
-    public void ActualizarInventarioUI(List<ItemEspacial> inventario)
+    // --- Inflación ---
+    public void ActualizarPrecios(ItemEspacial[] items)
     {
-        // Borrar elementos anteriores
-        foreach (Transform child in contenedorInventario)
-        {
-            Destroy(child.gameObject);
-        }
+        ButtonPrecio[] botones = canvasTienda.GetComponentsInChildren<ButtonPrecio>();
 
-        // Agregar nuevos elementos
-        foreach (ItemEspacial item in inventario)
+        for (int i = 0; i < botones.Length && i < items.Length; i++)
         {
-            GameObject nuevoItem = Instantiate(prefabItemInventario, contenedorInventario);
-            nuevoItem.GetComponentInChildren<TMP_Text>().text = item.nombre;
+            botones[i].ActualizarTexto(items[i]);
         }
     }
-    
-}
 
+}

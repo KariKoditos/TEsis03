@@ -152,7 +152,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 1681175424}
   - {fileID: 1431174652}
-  speed: 50
+  speed: 40
   loop: 1
 --- !u!1 &190929287 stripped
 GameObject:
@@ -187,7 +187,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 1575847074}
   - {fileID: 785313106}
-  speed: 50
+  speed: 35
   loop: 1
 --- !u!1 &212876633
 GameObject:
@@ -528,17 +528,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 555706860}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1385571640}
+  m_Father: {fileID: 1416522619}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -243.5478, y: 92.7865}
-  m_SizeDelta: {x: 467.6714, y: -1.5914}
+  m_AnchoredPosition: {x: 18.452225, y: 89.686485}
+  m_SizeDelta: {x: -128.06458, y: -404.69562}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &555706862
 MonoBehaviour:
@@ -1506,12 +1506,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 611898678}
-  - {fileID: 555706861}
   m_Father: {fileID: 1416522619}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 262, y: -3.1000137}
+  m_AnchoredPosition: {x: 128.4, y: 8.3}
   m_SizeDelta: {x: 204.264, y: 46.7486}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1385571641
@@ -1725,6 +1724,7 @@ RectTransform:
   - {fileID: 2111569061}
   - {fileID: 1966613385}
   - {fileID: 1951899965}
+  - {fileID: 555706861}
   - {fileID: 1385571640}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2031,7 +2031,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 212876634}
   - {fileID: 937476711}
-  speed: 50
+  speed: 45
   loop: 1
 --- !u!1 &1795801782 stripped
 GameObject:
@@ -2066,7 +2066,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 1404897986}
   - {fileID: 1135950401}
-  speed: 50
+  speed: 30
   loop: 1
 --- !u!1001 &1844595817
 PrefabInstance:
@@ -2366,7 +2366,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1966613385
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2517,7 +2517,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -269.7, y: -8}
+  m_AnchoredPosition: {x: -102.7, y: -8}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2111569062

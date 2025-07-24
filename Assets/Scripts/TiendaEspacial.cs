@@ -1,8 +1,16 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TiendaEspacial : MonoBehaviour
 {
     public FPSController controladorJugador;
+
+    [Header("Items en Venta")]
+    public ItemEspacial[] itemsEnVenta;
+
+    [Header("Inflación")]
+    public float incrementoPorciento = 5f; // % de aumento por ciclo
+    public float tiempoInflacion = 60f;    // Tiempo en segundos para aplicar inflación
+    private float timerInflacion = 0f;     // Contador interno
 
     public void AbrirTienda()
     {
@@ -27,4 +35,18 @@ public class TiendaEspacial : MonoBehaviour
         if (controladorJugador != null)
             controladorJugador.habilitarMovimiento = true;
     }
+
+    private void AplicarInflacion()
+    {
+        foreach (var item in itemsEnVenta)
+        {
+            // Incrementar precio y valor de venta
+            item.costo += Mathf.RoundToInt(item.costo * (incrementoPorciento / 100f));
+            item.valorVenta += Mathf.RoundToInt(item.valorVenta * (incrementoPorciento / 100f));
+        }
+
+        Debug.Log($" Inflación aplicada: +{incrementoPorciento}% a todos los precios.");
+        UIManager.instancia.ActualizarPrecios(itemsEnVenta);
+    }
+
 }

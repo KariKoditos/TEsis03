@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     public GameObject panelInventario;    
     public TMP_Text[] textosSlots;
     public Image[] iconosSlots;
+    public TMP_Text[] textosValorVenta;
 
     [Header("Jugador")]
     public FPSController controladorJugador;
@@ -64,26 +65,34 @@ public class UIManager : MonoBehaviour
         {
             if (i < inventario.Count)
             {
+                
                 textosSlots[i].text = inventario[i].nombre;
 
+                
+                textosValorVenta[i].text = $"Venta: ${inventario[i].valorVenta}";
+
+                
                 if (iconosSlots[i] != null)
                 {
-                    iconosSlots[i].sprite = inventario[i].icono;   
-                    iconosSlots[i].color = Color.white;            
+                    iconosSlots[i].sprite = inventario[i].icono;
+                    iconosSlots[i].color = Color.white;
                 }
             }
             else
             {
+                
                 textosSlots[i].text = "- Vacío -";
+                textosValorVenta[i].text = ""; 
 
                 if (iconosSlots[i] != null)
                 {
-                    iconosSlots[i].sprite = null;                  
-                    iconosSlots[i].color = new Color(1, 1, 1, 0);  
+                    iconosSlots[i].sprite = null;
+                    iconosSlots[i].color = new Color(1, 1, 1, 0);
                 }
             }
         }
     }
+
 
 
 

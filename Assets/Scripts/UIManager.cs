@@ -8,12 +8,13 @@ public class UIManager : MonoBehaviour
     public static UIManager instancia;
 
     [Header("UI General")]
-    public TMP_Text textoCreditos;        // Texto para créditos
-    public GameObject canvasTienda;       // Panel completo de la tienda
+    public TMP_Text textoCreditos;        
+    public GameObject canvasTienda;       
 
     [Header("Inventario")]
-    public GameObject panelInventario;    // Panel de inventario
-    public TMP_Text[] textosSlots;        // Textos de los 5 botones de inventario
+    public GameObject panelInventario;    
+    public TMP_Text[] textosSlots;
+    public Image[] iconosSlots;
 
     [Header("Jugador")]
     public FPSController controladorJugador;
@@ -42,31 +43,49 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        // Alternar Inventario con la tecla "I"
+        
         if (Input.GetKeyDown(KeyCode.I))
         {
             ToggleInventario();
         }
     }
 
-    // --- Créditos ---
+    
     public void ActualizarCreditos(int cantidad)
     {
         if (textoCreditos != null)
             textoCreditos.text = $"CRÉDITOS: {cantidad}";
     }
 
-    // --- Inventario ---
+
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)
     {
         for (int i = 0; i < textosSlots.Length; i++)
         {
             if (i < inventario.Count)
+            {
                 textosSlots[i].text = inventario[i].nombre;
+
+                if (iconosSlots[i] != null)
+                {
+                    iconosSlots[i].sprite = inventario[i].icono;   
+                    iconosSlots[i].color = Color.white;            
+                }
+            }
             else
+            {
                 textosSlots[i].text = "- Vacío -";
+
+                if (iconosSlots[i] != null)
+                {
+                    iconosSlots[i].sprite = null;                  
+                    iconosSlots[i].color = new Color(1, 1, 1, 0);  
+                }
+            }
         }
     }
+
+
 
     public void VenderSlot(int slotIndex)
     {
@@ -96,7 +115,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // --- Tienda ---
+    
     public void MostrarTienda()
     {
         if (canvasTienda != null)
@@ -109,7 +128,7 @@ public class UIManager : MonoBehaviour
             canvasTienda.SetActive(false);
     }
 
-    // --- Inflación ---
+    
     public void ActualizarPrecios(ItemEspacial[] items)
     {
         ButtonPrecio[] botones = canvasTienda.GetComponentsInChildren<ButtonPrecio>();

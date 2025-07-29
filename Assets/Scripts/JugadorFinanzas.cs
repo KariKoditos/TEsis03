@@ -19,24 +19,26 @@ public class JugadorFinanzas : MonoBehaviour
     {
         if (inventario.Count >= maxInventario)
         {
-            Debug.Log(" Inventario lleno. Vende algo antes de comprar más.");
+            Debug.Log("Inventario lleno. No puedes comprar más objetos.");
             return;
         }
 
         if (creditos >= item.costo)
         {
             creditos -= item.costo;
-            inventario.Add(item);
-            Debug.Log(" Compraste: {item.nombre}. Créditos restantes: {creditos}");
+            inventario.Add(item);  // Agregar al inventario
+            Debug.Log($"Compraste: {item.nombre}. Créditos restantes: {creditos}");
 
+            // Actualizar la UI
             UIManager.instancia.ActualizarCreditos(creditos);
             UIManager.instancia.ActualizarInventarioUI(inventario);
         }
         else
         {
-            Debug.Log("No tienes suficientes créditos");
+            Debug.Log("No tienes suficientes créditos para comprar este ítem.");
         }
     }
+
 
     public void Vender(int index)
     {

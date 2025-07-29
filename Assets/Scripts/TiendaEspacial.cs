@@ -8,9 +8,9 @@ public class TiendaEspacial : MonoBehaviour
     public ItemEspacial[] itemsEnVenta;
 
     [Header("Inflación")]
-    public float incrementoPorciento = 5f; // % de aumento por ciclo
-    public float tiempoInflacion = 60f;    // Tiempo en segundos para aplicar inflación
-    private float timerInflacion = 0f;     // Contador interno
+    public float incrementoPorciento = 5f; 
+    public float tiempoInflacion = 60f;    
+         
 
     public void AbrirTienda()
     {

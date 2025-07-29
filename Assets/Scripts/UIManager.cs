@@ -8,7 +8,8 @@ public class UIManager : MonoBehaviour
     public static UIManager instancia;
 
     [Header("UI General")]
-    public TMP_Text textoCreditos;        
+    public TMP_Text textoCreditos;
+    public TMP_Text textoCreditosAhorro;
     public GameObject canvasTienda;       
 
     [Header("Inventario")]
@@ -19,6 +20,12 @@ public class UIManager : MonoBehaviour
 
     [Header("Jugador")]
     public FPSController controladorJugador;
+
+    [Header("Ahorro")]
+    public TMP_Text textoAhorro;
+
+    [Header("Ahorro UI")]
+    public TMP_InputField inputCantidadAhorro;
 
     private bool inventarioAbierto = false;
 
@@ -51,12 +58,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    
+
     public void ActualizarCreditos(int cantidad)
     {
         if (textoCreditos != null)
             textoCreditos.text = $"CRÉDITOS: {cantidad}";
+
+        if (textoCreditosAhorro != null)
+            textoCreditosAhorro.text = $"CRÉDITOS: {cantidad}";
     }
+
 
 
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)
@@ -93,6 +104,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ActualizarAhorro(int cantidad)
+    {
+        if (textoAhorro != null)
+            textoAhorro.text = $"AHORRO: {cantidad}";
+    }
 
 
 
@@ -146,6 +162,21 @@ public class UIManager : MonoBehaviour
         {
             botones[i].ActualizarTexto(items[i]);
         }
+    }
+
+
+    public void DepositarDesdeUI()
+    {
+        int cantidad;
+        if (int.TryParse(inputCantidadAhorro.text, out cantidad))
+            JugadorFinanzas.instancia.Depositar(cantidad);
+    }
+
+    public void RetirarDesdeUI()
+    {
+        int cantidad;
+        if (int.TryParse(inputCantidadAhorro.text, out cantidad))
+            JugadorFinanzas.instancia.Retirar(cantidad);
     }
 
 }

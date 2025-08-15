@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,7 +17,16 @@ public class UIManager : MonoBehaviour
     public GameObject panelInventario;    
     public TMP_Text[] textosSlots;
     public Image[] iconosSlots;
-    public TMP_Text[] textosValorVenta;
+    
+
+    [Header("Panel de Detalles del Inventario")]
+    public GameObject panel;
+    public Image imagenGrande;
+    public TMP_Text textoNombre;
+    public TMP_Text textoDescripcion;
+    public TMP_Text textoValorVenta;
+    public Button botonVender;
+    public Button botonUsar;
 
     [Header("Jugador")]
     public FPSController controladorJugador;
@@ -28,6 +38,10 @@ public class UIManager : MonoBehaviour
     public TMP_InputField inputCantidadAhorro;
 
     private bool inventarioAbierto = false;
+    private ItemEspacial itemSeleccionado;
+    private int indexSeleccionado;
+    
+
 
     private void Awake()
     {
@@ -79,10 +93,10 @@ public class UIManager : MonoBehaviour
                 
                 textosSlots[i].text = inventario[i].nombre;
 
-                
-                textosValorVenta[i].text = $"Venta: ${inventario[i].valorVenta}";
 
-                
+                textoValorVenta.text = $"Venta: ${inventario[i].valorVenta}";
+
+
                 if (iconosSlots[i] != null)
                 {
                     iconosSlots[i].sprite = inventario[i].icono;
@@ -93,7 +107,8 @@ public class UIManager : MonoBehaviour
             {
                 
                 textosSlots[i].text = "- Vacío -";
-                textosValorVenta[i].text = ""; 
+                //textosValorVenta[i].text = "";
+
 
                 if (iconosSlots[i] != null)
                 {
@@ -103,6 +118,57 @@ public class UIManager : MonoBehaviour
             }
         }
     }
+
+    public void MostrarDetalles(ItemEspacial item, int indice)
+    {
+        if (panel != null) panel.SetActive(true);
+
+        if (imagenGrande != null) imagenGrande.sprite = item.icono;
+        if (textoDescripcion != null) textoDescripcion.text = item.descripcion;
+        if (textoValorVenta != null) textoValorVenta.text = $"Venta: ${item.valorVenta}";
+
+        itemSeleccionado = item;
+
+        // Configurar botón Vender
+        botonVender.onClick.RemoveAllListeners();
+        botonVender.onClick.AddListener(() => VenderSlot(indexSeleccionado));
+
+        // Configurar botón Usar
+        botonUsar.onClick.RemoveAllListeners();
+        botonUsar.onClick.AddListener(() => UsarItem(itemSeleccionado));
+    }
+
+    public void UsarItem(ItemEspacial item)
+    {
+        // Ejemplo de efecto: aumentar barra de comida (esto lo implementarás después)
+        Debug.Log($"Usaste el item: {item.nombre}");
+
+        // También puedes quitarlo del inventario si deseas
+        JugadorFinanzas.instancia.inventario.Remove(item);
+
+        // Actualizar UI después de usar
+        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+
+        // Ocultar panel de detalles
+        if (panel != null)
+            panel.SetActive(false);
+
+    }
+
+
+    public void VenderDesdeDetalle()
+    {
+        JugadorFinanzas.instancia.Vender(indexSeleccionado);
+        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+
+        if (panel != null)
+            panel.SetActive(false);
+    }
+
+
+
 
     public void ActualizarAhorro(int cantidad)
     {

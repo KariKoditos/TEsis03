@@ -1,5 +1,9 @@
 using UnityEngine;
 
+
+
+
+
 public enum TipoItem
 {
     Necesidad,
@@ -16,4 +20,6 @@ public class ItemEspacial
     public int valorVenta;
     public TipoItem tipo;
     public Sprite icono;
+    public string descripcion;
 }
+

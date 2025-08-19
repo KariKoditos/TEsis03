@@ -19,7 +19,9 @@ public class BotonInventario : MonoBehaviour
         if (indice >= 0 && indice < inventario.Count)
         {
             var item = inventario[indice];
-            UIManager.instancia.MostrarDetalles(item, indice);
+            UIManager.instancia.MostrarDetallesItem(item, indice);
+
+
         }
     }
 }

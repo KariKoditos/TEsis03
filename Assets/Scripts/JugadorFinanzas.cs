@@ -8,7 +8,10 @@ public class JugadorFinanzas : MonoBehaviour
     public int creditos = 200;
     public int maxInventario = 5;
     public int saldoAhorro = 0;
-    public List<ItemEspacial> inventario = new List<ItemEspacial>();
+    public List<ItemEspacial> inventario = new List<ItemEspacial>(); 
+    public bool hizoCompra = false;
+    public bool hizoVenta = false;
+    public bool usoAhorro = false;
 
     private void Awake()
     {
@@ -45,6 +48,8 @@ public class JugadorFinanzas : MonoBehaviour
 
         UIManager.instancia.ActualizarCreditos(creditos);
         UIManager.instancia.ActualizarAhorro(saldoAhorro);
+        usoAhorro = true;
+        VerificarDesbloqueoInversiones();
         Debug.Log($"Retiraste {cantidad} créditos. Saldo ahorro: {saldoAhorro}");
     }
 
@@ -59,20 +64,31 @@ public class JugadorFinanzas : MonoBehaviour
         if (creditos >= item.costo)
         {
             creditos -= item.costo;
-            inventario.Add(item);  
-            Debug.Log($"Compraste: {item.nombre}. Créditos restantes: {creditos}");
 
-            
+            // Crear una copia del ítem para que no se comparta con la tienda
+            ItemEspacial copia = new ItemEspacial();
+            copia.nombre = item.nombre;
+            copia.costo = item.costo;
+            copia.valorVenta = item.valorVenta;
+            copia.tipo = item.tipo;
+            copia.icono = item.icono;
+            copia.descripcion = item.descripcion;
+
+            inventario.Add(copia);
+
+            Debug.Log($"Compraste: {item.nombre}. Créditos restantes: {creditos}");
 
             UIManager.instancia.ActualizarCreditos(creditos);
             UIManager.instancia.ActualizarInventarioUI(inventario);
+
+            hizoCompra = true;
+            VerificarDesbloqueoInversiones();
         }
         else
         {
             Debug.Log("No tienes suficientes créditos para comprar este ítem.");
         }
     }
-
 
     public void Vender(int index)
     {
@@ -89,5 +105,19 @@ public class JugadorFinanzas : MonoBehaviour
         Debug.Log($" Vendiste: {item.nombre}. Créditos actuales: {creditos}");
         UIManager.instancia.ActualizarCreditos(creditos);
         UIManager.instancia.ActualizarInventarioUI(inventario);
+        hizoVenta = true;
+        VerificarDesbloqueoInversiones();
     }
+
+
+    void VerificarDesbloqueoInversiones()
+    {
+        if (hizoCompra && hizoVenta && usoAhorro)
+        {
+            UIManager.instancia.ActivarBotonInversion();
+            Debug.Log("¡Mecánica de inversión desbloqueada!");
+        }
+    }
+
+
 }

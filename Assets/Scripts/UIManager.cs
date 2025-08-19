@@ -1,8 +1,7 @@
 using UnityEngine;
 using TMPro;
-using System.Collections.Generic;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,16 +10,15 @@ public class UIManager : MonoBehaviour
     [Header("UI General")]
     public TMP_Text textoCreditos;
     public TMP_Text textoCreditosAhorro;
-    public GameObject canvasTienda;       
+    public GameObject canvasTienda;
 
     [Header("Inventario")]
-    public GameObject panelInventario;    
+    public GameObject panelInventario;
     public TMP_Text[] textosSlots;
     public Image[] iconosSlots;
-    
 
-    [Header("Panel de Detalles del Inventario")]
-    public GameObject panel;
+    [Header("Detalles de Item")]
+    public GameObject panelDetalles;
     public Image imagenGrande;
     public TMP_Text textoNombre;
     public TMP_Text textoDescripcion;
@@ -37,41 +35,110 @@ public class UIManager : MonoBehaviour
     [Header("Ahorro UI")]
     public TMP_InputField inputCantidadAhorro;
 
+    [Header("Inversiones")]
+    public Button botonInversion;
+    public GameObject panelInversion;
+    public TMP_InputField inputCantidadInversion;
+    public TMP_Text textoCreditosInversion;
+
+
     private bool inventarioAbierto = false;
-    private ItemEspacial itemSeleccionado;
-    private int indexSeleccionado;
-    
+    private int indexItemSeleccionado = -1;
+
+
+    public void Start()
+    {
+        botonInversion.gameObject.SetActive(false);
+
+    }
+
 
 
     private void Awake()
     {
-        if (instancia == null)
-            instancia = this;
-        else
-            Destroy(gameObject);
-    }
-
-    private void Start()
-    {
-        if (canvasTienda != null)
-            canvasTienda.SetActive(false);
-
-        if (panelInventario != null)
-            panelInventario.SetActive(false);
-
-        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
-        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+        if (instancia == null) instancia = this;
+        else Destroy(gameObject);
     }
 
     private void Update()
     {
-        
         if (Input.GetKeyDown(KeyCode.I))
         {
-            ToggleInventario();
+            if (inventarioAbierto)
+                OcultarInventario();
+            else
+                MostrarInventario();
         }
     }
 
+    public void MostrarInventario()
+    {
+        inventarioAbierto = true;
+        panelInventario.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        Time.timeScale = 0f;
+        if (controladorJugador != null)
+            controladorJugador.habilitarMovimiento = false;
+        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+    }
+
+    public void OcultarInventario()
+    {
+        inventarioAbierto = false;
+        panelInventario.SetActive(false);
+        panelDetalles.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        Time.timeScale = 1f;
+        if (controladorJugador != null)
+            controladorJugador.habilitarMovimiento = true;
+    }
+
+    public void ActualizarInventarioUI(List<ItemEspacial> inventario)
+    {
+        for (int i = 0; i < textosSlots.Length; i++)
+        {
+            if (i < inventario.Count)
+            {
+                textosSlots[i].text = inventario[i].nombre;
+                iconosSlots[i].sprite = inventario[i].icono;
+                iconosSlots[i].color = Color.white;
+            }
+            else
+            {
+                textosSlots[i].text = "- Vacío -";
+                iconosSlots[i].sprite = null;
+                iconosSlots[i].color = new Color(1, 1, 1, 0);
+            }
+        }
+    }
+
+    public void MostrarDetallesItem(ItemEspacial item, int index)
+    {
+        panelDetalles.SetActive(true);
+        imagenGrande.sprite = item.icono;
+        textoNombre.text = item.nombre;
+        Debug.Log($"Descripción cargada: {item.descripcion}");
+        textoDescripcion.text = item.descripcion;
+        textoValorVenta.text = $"Venta: ${item.valorVenta}";
+
+        indexItemSeleccionado = index;
+
+        botonVender.onClick.RemoveAllListeners();
+        botonVender.onClick.AddListener(() => VenderItem());
+    }
+
+    public void VenderItem()
+    {
+        if (indexItemSeleccionado >= 0)
+        {
+            JugadorFinanzas.instancia.Vender(indexItemSeleccionado);
+            ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+            ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+            panelDetalles.SetActive(false);
+        }
+    }
 
     public void ActualizarCreditos(int cantidad)
     {
@@ -82,154 +149,11 @@ public class UIManager : MonoBehaviour
             textoCreditosAhorro.text = $"CRÉDITOS: {cantidad}";
     }
 
-
-
-    public void ActualizarInventarioUI(List<ItemEspacial> inventario)
-    {
-        for (int i = 0; i < textosSlots.Length; i++)
-        {
-            if (i < inventario.Count)
-            {
-                
-                textosSlots[i].text = inventario[i].nombre;
-
-
-                textoValorVenta.text = $"Venta: ${inventario[i].valorVenta}";
-
-
-                if (iconosSlots[i] != null)
-                {
-                    iconosSlots[i].sprite = inventario[i].icono;
-                    iconosSlots[i].color = Color.white;
-                }
-            }
-            else
-            {
-                
-                textosSlots[i].text = "- Vacío -";
-                //textosValorVenta[i].text = "";
-
-
-                if (iconosSlots[i] != null)
-                {
-                    iconosSlots[i].sprite = null;
-                    iconosSlots[i].color = new Color(1, 1, 1, 0);
-                }
-            }
-        }
-    }
-
-    public void MostrarDetalles(ItemEspacial item, int indice)
-    {
-        if (panel != null) panel.SetActive(true);
-
-        if (imagenGrande != null) imagenGrande.sprite = item.icono;
-        if (textoDescripcion != null) textoDescripcion.text = item.descripcion;
-        if (textoValorVenta != null) textoValorVenta.text = $"Venta: ${item.valorVenta}";
-
-        itemSeleccionado = item;
-
-        // Configurar botón Vender
-        botonVender.onClick.RemoveAllListeners();
-        botonVender.onClick.AddListener(() => VenderSlot(indexSeleccionado));
-
-        // Configurar botón Usar
-        botonUsar.onClick.RemoveAllListeners();
-        botonUsar.onClick.AddListener(() => UsarItem(itemSeleccionado));
-    }
-
-    public void UsarItem(ItemEspacial item)
-    {
-        // Ejemplo de efecto: aumentar barra de comida (esto lo implementarás después)
-        Debug.Log($"Usaste el item: {item.nombre}");
-
-        // También puedes quitarlo del inventario si deseas
-        JugadorFinanzas.instancia.inventario.Remove(item);
-
-        // Actualizar UI después de usar
-        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
-        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
-
-        // Ocultar panel de detalles
-        if (panel != null)
-            panel.SetActive(false);
-
-    }
-
-
-    public void VenderDesdeDetalle()
-    {
-        JugadorFinanzas.instancia.Vender(indexSeleccionado);
-        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
-        ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
-
-        if (panel != null)
-            panel.SetActive(false);
-    }
-
-
-
-
     public void ActualizarAhorro(int cantidad)
     {
         if (textoAhorro != null)
             textoAhorro.text = $"AHORRO: {cantidad}";
     }
-
-
-
-    public void VenderSlot(int slotIndex)
-    {
-        JugadorFinanzas.instancia.Vender(slotIndex);
-    }
-
-    public void ToggleInventario()
-    {
-        inventarioAbierto = !inventarioAbierto;
-        panelInventario.SetActive(inventarioAbierto);
-
-        if (inventarioAbierto)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            Time.timeScale = 0f;
-            if (controladorJugador != null)
-                controladorJugador.habilitarMovimiento = false;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            Time.timeScale = 1f;
-            if (controladorJugador != null)
-                controladorJugador.habilitarMovimiento = true;
-        }
-    }
-
-    
-    public void MostrarTienda()
-    {
-        if (canvasTienda != null)
-            canvasTienda.SetActive(true);
-    }
-
-    public void OcultarTienda()
-    {
-        if (canvasTienda != null)
-            canvasTienda.SetActive(false);
-    }
-
-    
-    public void ActualizarPrecios(ItemEspacial[] items)
-    {
-        ButtonPrecio[] botones = canvasTienda.GetComponentsInChildren<ButtonPrecio>();
-
-        for (int i = 0; i < botones.Length && i < items.Length; i++)
-        {
-            botones[i].ActualizarTexto(items[i]);
-        }
-    }
-
 
     public void DepositarDesdeUI()
     {
@@ -245,4 +169,48 @@ public class UIManager : MonoBehaviour
             JugadorFinanzas.instancia.Retirar(cantidad);
     }
 
+    public void MostrarTienda()
+    {
+        if (canvasTienda != null)
+            canvasTienda.SetActive(true);
+    }
+
+    public void OcultarTienda()
+    {
+        if (canvasTienda != null)
+            canvasTienda.SetActive(false);
+    }
+
+    public void ActualizarPrecios(ItemEspacial[] items)
+    {
+        ButtonPrecio[] botones = canvasTienda.GetComponentsInChildren<ButtonPrecio>();
+
+        for (int i = 0; i < botones.Length && i < items.Length; i++)
+        {
+            botones[i].ActualizarTexto(items[i]);
+        }
+    }
+
+    public void ActivarBotonInversion()
+    {
+        if (botonInversion != null)
+        {
+            botonInversion.gameObject.SetActive(true);
+            Debug.Log("Botón de inversión activado");
+        }
+        else
+        {
+            Debug.LogWarning("No se asignó el botón de inversión en el inspector");
+        }
+    }
+
+    public void MostrarPanelInversion()
+    {
+        if (panelInversion != null)
+            panelInversion.SetActive(true);
+
+        if (textoCreditosInversion != null)
+            textoCreditosInversion.text = $"CRÉDITOS: {JugadorFinanzas.instancia.creditos}";
+
+    }
 }

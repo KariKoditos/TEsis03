@@ -1,25 +1,22 @@
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "Nuevo Item", menuName = "Items/ItemEspacial")]
+public class ItemEspacial : ScriptableObject
+{
+    public string nombre;
+    public int costo;
+    public int valorVenta;
+    public Sprite icono;
+    public TipoItem tipo;
 
-
-
+    [TextArea(2, 4)]    
+    public string descripcion;
+}
 
 public enum TipoItem
 {
     Necesidad,
     Lujo,
-    Inversion,
-    Prevencion
+    Inversión,
+    Prevención
 }
-
-[System.Serializable]
-public class ItemEspacial
-{
-    public string nombre;
-    public int costo;
-    public int valorVenta;
-    public TipoItem tipo;
-    public Sprite icono;
-    public string descripcion;
-}
-

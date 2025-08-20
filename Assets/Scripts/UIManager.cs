@@ -44,6 +44,7 @@ public class UIManager : MonoBehaviour
 
     private bool inventarioAbierto = false;
     private int indexItemSeleccionado = -1;
+    public static bool panelInversionAbierto = false;
 
 
     public void Start()
@@ -69,6 +70,30 @@ public class UIManager : MonoBehaviour
             else
                 MostrarInventario();
         }
+
+        if (Input.GetKeyDown(KeyCode.P)) 
+        {
+            if (!panelInversion.activeSelf)
+            {
+                MostrarPanelInversion();
+            }
+            else
+            {
+                CerrarPanelInversiones();
+            }
+
+        }
+
+    }
+
+    void TogglePanelInversiones()
+    {
+        bool activo = panelInversion.activeSelf;
+        panelInversion.SetActive(!activo);
+
+        // Mostrar o esconder el cursor dependiendo del estado
+        Cursor.lockState = activo ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !activo;
     }
 
     public void MostrarInventario()
@@ -206,11 +231,23 @@ public class UIManager : MonoBehaviour
 
     public void MostrarPanelInversion()
     {
-        if (panelInversion != null)
-            panelInversion.SetActive(true);
+        panelInversion.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        controladorJugador.habilitarMovimiento = false;
 
         if (textoCreditosInversion != null)
             textoCreditosInversion.text = $"CRÉDITOS: {JugadorFinanzas.instancia.creditos}";
-
     }
+
+    public void CerrarPanelInversiones()
+    {
+        panelInversion.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        controladorJugador.habilitarMovimiento = true;
+    }
+
 }

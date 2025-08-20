@@ -13,6 +13,10 @@ public class JugadorFinanzas : MonoBehaviour
     public bool hizoVenta = false;
     public bool usoAhorro = false;
 
+    [Header("Sistema de Inversión")]
+    public int inversionesSegurasRealizadas = 2;
+    public bool inversionesRiesgosasDesbloqueadas = false;
+
     private void Awake()
     {
         if (instancia == null) instancia = this;
@@ -118,6 +122,21 @@ public class JugadorFinanzas : MonoBehaviour
             Debug.Log("¡Mecánica de inversión desbloqueada!");
         }
     }
+
+    public void RegistrarInversionSegura()
+    {
+        inversionesSegurasRealizadas++;
+
+        if (inversionesSegurasRealizadas >= 2 && !inversionesRiesgosasDesbloqueadas)
+        {
+            inversionesRiesgosasDesbloqueadas = true;
+            Debug.Log("Inversiones riesgosas desbloqueadas");
+           // UIManager.instancia.MostrarMensajeDesbloqueo(); // si quieres mostrar algo visual
+        }
+    }
+
+
+
 
 
 }

@@ -41,6 +41,21 @@ public class UIManager : MonoBehaviour
     public TMP_InputField inputCantidadInversion;
     public TMP_Text textoCreditosInversion;
 
+    [Header("Desbloqueo Inversiones")]
+    [Tooltip("Inversiones seguras exitosas requeridas para desbloquear las riesgosas.")]
+    public int segurasParaDesbloquear = 2;
+    private int inversionesSegurasExitosas = 0;
+    private bool riesgosDesbloqueados = false;
+
+    [Header("Panel de Inversión Individual")]
+    public GameObject panelInputInversion;
+    public TMP_InputField inputCantidad;
+    public TMP_Text textoNombreInversion;
+    public Button botonConfirmarInversion;
+
+    // Datos temporales de la carta seleccionada
+    //private DatosInversion inversionSeleccionada;
+
 
     private bool inventarioAbierto = false;
     private int indexItemSeleccionado = -1;
@@ -60,6 +75,8 @@ public class UIManager : MonoBehaviour
         if (instancia == null) instancia = this;
         else Destroy(gameObject);
     }
+
+
 
     private void Update()
     {
@@ -237,8 +254,8 @@ public class UIManager : MonoBehaviour
 
         controladorJugador.habilitarMovimiento = false;
 
-        if (textoCreditosInversion != null)
-            textoCreditosInversion.text = $"CRÉDITOS: {JugadorFinanzas.instancia.creditos}";
+        RefrescarUIEconomia();
+        RefrescarInteractividadCartas();
     }
 
     public void CerrarPanelInversiones()
@@ -248,6 +265,65 @@ public class UIManager : MonoBehaviour
         Cursor.visible = false;
 
         controladorJugador.habilitarMovimiento = true;
+    }
+
+    public int GetCreditos()
+    {
+        return JugadorFinanzas.instancia != null ? JugadorFinanzas.instancia.creditos : 0;
+    }
+
+    public bool TryGastarCreditos(int monto)
+    {
+        if (monto <= 0) return false;
+        if (JugadorFinanzas.instancia == null) return false;
+        if (JugadorFinanzas.instancia.creditos < monto) return false;
+
+        JugadorFinanzas.instancia.creditos -= monto;
+        RefrescarUIEconomia();
+        return true;
+    }
+
+    public void AgregarCreditos(int cantidad)
+    {
+        if (cantidad == 0 || JugadorFinanzas.instancia == null) return;
+        JugadorFinanzas.instancia.creditos = Mathf.Max(0, JugadorFinanzas.instancia.creditos + cantidad);
+        RefrescarUIEconomia();
+    }
+
+
+    private void RefrescarUIEconomia()
+    {
+        // Refresca textos principales
+        ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+
+        // Refresca el texto de créditos visible dentro del panel de inversiones
+        if (textoCreditosInversion != null)
+            textoCreditosInversion.text = $"CRÉDITOS: {JugadorFinanzas.instancia.creditos}";
+    }
+
+    // === Desbloqueo de riesgosas ===
+    public void RegistrarInversionSeguraExitosa()
+    {
+        inversionesSegurasExitosas++;
+        if (!riesgosDesbloqueados && inversionesSegurasExitosas >= segurasParaDesbloquear)
+        {
+            riesgosDesbloqueados = true;
+            Debug.Log("¡Riesgosas desbloqueadas!");
+            RefrescarInteractividadCartas(); //  habilita el botón Invertir de las riesgosas
+        }
+    }
+
+    public bool RiesgosDesbloqueados()
+    {
+        return riesgosDesbloqueados;
+    }
+
+    public void RefrescarInteractividadCartas()
+    {
+        // Incluye inactivos en la escena (por si el panel está cerrado)
+        var cartas = GameObject.FindObjectsOfType<CartaInversion>(true);
+        foreach (var carta in cartas)
+            carta.ActualizarInteractividad();
     }
 
 }

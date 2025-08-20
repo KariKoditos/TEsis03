@@ -5,7 +5,7 @@ public class JugadorFinanzas : MonoBehaviour
 {
     public static JugadorFinanzas instancia;
 
-    public int creditos = 200;
+    public int creditos = 1000;
     public int maxInventario = 5;
     public int saldoAhorro = 0;
     public List<ItemEspacial> inventario = new List<ItemEspacial>(); 
@@ -134,7 +134,6 @@ public class JugadorFinanzas : MonoBehaviour
            // UIManager.instancia.MostrarMensajeDesbloqueo(); // si quieres mostrar algo visual
         }
     }
-
 
 
 

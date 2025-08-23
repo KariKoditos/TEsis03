@@ -124,22 +124,61 @@ public class CartaInversion : MonoBehaviour
             return;
         }
 
-        // Evita doble click accidental
-        if (botonConfirmar) botonConfirmar.interactable = false;
-
-        // Descontamos primero vía UIManager (para que refresque toda la UI)
+        // Descontar primero (con UIManager para refrescar UI)
         if (!UIManager.instancia.TryGastarCreditos(cantidad))
         {
-            MostrarResultado("No tienes suficientes créditos para invertir.");
-            if (botonConfirmar) botonConfirmar.interactable = true;
+            MostrarResultado("No tienes suficientes créditos.");
             return;
         }
 
-        // Guardamos la cantidad y arrancamos la "maduración" de la inversión
-        cantidadPendiente = cantidad;
+        // Duración por carta (lo que ya tenías configurable en el Inspector)
+        float duracion = usarRango
+            ? Random.Range(rangoDuracionSeg.x, rangoDuracionSeg.y)
+            : duracionSegundos;
 
-        float duracion = usarRango ? Random.Range(rangoDuracionSeg.x, rangoDuracionSeg.y) : duracionSegundos;
-        StartCoroutine(RutinaInversion(duracion));
+        // Lanzar procesamiento en un objeto que NO se desactiva
+        InvestmentManager.Instancia.IniciarInversion(
+            nombreInversion,
+            esRiesgosa,
+            cantidad,
+            gananciaBase,
+            duracion,
+            onResolvedUI: () =>
+            {
+                // Este callback se llama al terminar, SI la carta sigue activa.
+                // Aquí puedes resetear UI local si quieres.
+                if (this && gameObject.activeInHierarchy)
+                {
+                    if (inputCantidad) inputCantidad.gameObject.SetActive(false);
+                    if (botonConfirmar) botonConfirmar.gameObject.SetActive(false);
+                    if (botonInvertir) botonInvertir.gameObject.SetActive(true);
+                }
+            }
+        );
+
+        // (Opcional) mostrar barra local mientras el panel está abierto
+        if (barraProgreso)
+        {
+            barraProgreso.value = 0f;
+            barraProgreso.gameObject.SetActive(true);
+            StartCoroutine(BarraLocal(duracion));
+        }
+        if (botonInvertir) botonInvertir.gameObject.SetActive(false);
+        if (botonConfirmar) botonConfirmar.gameObject.SetActive(false);
+        if (inputCantidad) inputCantidad.gameObject.SetActive(false);
+    }
+
+    // Solo visual; si cierras el panel este UI se desactiva y no pasa nada.
+    IEnumerator BarraLocal(float dur)
+    {
+        float t = 0f;
+        while (t < dur && gameObject.activeInHierarchy)
+        {
+            t += Time.unscaledDeltaTime;
+            if (barraProgreso) barraProgreso.value = Mathf.Clamp01(t / dur);
+            yield return null;
+        }
+        if (barraProgreso) barraProgreso.gameObject.SetActive(false);
     }
 
     IEnumerator RutinaInversion(float duracion)

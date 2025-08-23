@@ -47,11 +47,9 @@ public class UIManager : MonoBehaviour
     private int inversionesSegurasExitosas = 0;
     private bool riesgosDesbloqueados = false;
 
-    [Header("Panel de Inversión Individual")]
-    public GameObject panelInputInversion;
-    public TMP_InputField inputCantidad;
-    public TMP_Text textoNombreInversion;
-    public Button botonConfirmarInversion;
+
+    [Header("PaneleNotificaciones")]
+    public GameObject panelNotificaciones;
 
     // Datos temporales de la carta seleccionada
     //private DatosInversion inversionSeleccionada;
@@ -60,6 +58,7 @@ public class UIManager : MonoBehaviour
     private bool inventarioAbierto = false;
     private int indexItemSeleccionado = -1;
     public static bool panelInversionAbierto = false;
+    private bool abierto = false;
 
 
     public void Start()
@@ -101,6 +100,14 @@ public class UIManager : MonoBehaviour
 
         }
 
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            if (!abierto)
+                MostrarNotificaciones();
+            else
+                CerrarNotificaciones();
+        }
+
     }
 
     void TogglePanelInversiones()
@@ -125,6 +132,23 @@ public class UIManager : MonoBehaviour
         ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
     }
 
+    public void MostrarNotificaciones()
+    {
+        panelNotificaciones.SetActive(true);
+        abierto = true;
+
+        // activar cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // bloquear movimiento
+        if (controladorJugador != null)
+            controladorJugador.habilitarMovimiento = false;
+
+        // opcional: pausar juego
+        Time.timeScale = 0f;
+    }
+
     public void OcultarInventario()
     {
         inventarioAbierto = false;
@@ -135,6 +159,23 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         if (controladorJugador != null)
             controladorJugador.habilitarMovimiento = true;
+    }
+
+    public void CerrarNotificaciones()
+    {
+        panelNotificaciones.SetActive(false);
+        abierto = false;
+
+        // ocultar cursor
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        if (controladorJugador != null)
+            controladorJugador.habilitarMovimiento = true;
+
+        // reanudar juego
+        Time.timeScale = 1f;
+
     }
 
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)

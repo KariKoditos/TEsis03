@@ -208,8 +208,24 @@ public class UIManager : MonoBehaviour
 
         indexItemSeleccionado = index;
 
+        // Botón Vender
         botonVender.onClick.RemoveAllListeners();
         botonVender.onClick.AddListener(() => VenderItem());
+
+        // Botón Usar -> llama a JugadorFinanzas
+        botonUsar.onClick.RemoveAllListeners();
+        botonUsar.onClick.AddListener(() =>
+        {
+            if (JugadorFinanzas.instancia != null)
+                JugadorFinanzas.instancia.UsarItemPorIndice(indexItemSeleccionado);
+
+            panelDetalles.SetActive(false);
+            indexItemSeleccionado = -1;
+        });
+
+        // (Opcional) habilitar o no el botón según el tipo/efecto
+        bool usable = (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna);
+        botonUsar.interactable = usable;
     }
 
     public void VenderItem()
@@ -365,6 +381,18 @@ public class UIManager : MonoBehaviour
         var cartas = GameObject.FindObjectsOfType<CartaInversion>(true);
         foreach (var carta in cartas)
             carta.ActualizarInteractividad();
+    }
+
+
+    public void OnClickUsarItem()
+    {
+        if (indexItemSeleccionado < 0 || JugadorFinanzas.instancia == null) return;
+
+        JugadorFinanzas.instancia.UsarItemPorIndice(indexItemSeleccionado);
+
+        // Cierra el panel de detalles y limpia selección
+        panelDetalles.SetActive(false);
+        indexItemSeleccionado = -1;
     }
 
 }

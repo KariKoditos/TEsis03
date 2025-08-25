@@ -15,10 +15,13 @@ public class NotificationManager : MonoBehaviour
     public GameObject prefabToast;         // Prefab: CanvasGroup + Image fondo + (opcional) Image hijo "Icon" + TMP_Text
     [Range(1, 10)] public int maxVisibles = 5;
     public float duracionPorDefecto = 4f;
-    [Tooltip("Si es true, los toasts expiran aunque el juego esté 'pausado' por UI.")]
+    
     public bool usarTiempoNoEscalado = true;
 
-    
+
+    [Header("Mostrar toasts en pantalla")]
+    public bool mostrarToasts = true;
+
 
     [Header("Icono de aviso (campanita/punto)")]
     public Image imagenAviso;  
@@ -26,7 +29,7 @@ public class NotificationManager : MonoBehaviour
     // --- Pool de instancias para evitar GC
     readonly Queue<GameObject> pool = new Queue<GameObject>();
 
-    // --- Historial persistente para el panel
+    // -save ihitorial
     [SerializeField] int maxHistorial = 200;
     readonly List<(string msg, NotificationType tipo, System.DateTime ts)> historial =
         new List<(string, NotificationType, System.DateTime)>(128);
@@ -49,8 +52,8 @@ public class NotificationManager : MonoBehaviour
 
         if (imagenAviso) imagenAviso.gameObject.SetActive(true);
 
-        // 2) Mostrar toast visual (temporal)
-        if (!contenedor || !prefabToast) { Debug.Log(mensaje); return; }
+        //quita los mensajes en la pantalla principal
+        if (!mostrarToasts) { Debug.Log(mensaje); return; }
 
         // Limitar visibles
         while (contenedor.childCount >= maxVisibles)

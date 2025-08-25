@@ -16,7 +16,7 @@ public enum NeedType
 public class NeedStatusConf
 {
     public NeedType tipo;
-    [Range(0, 100)] public int valorInicial = 100;
+    [Range(0, 100)] public int valorInicial = 200;
     [Range(0, 10)] public int decaimientoPorTick = 1; 
 }
 
@@ -52,9 +52,9 @@ public class NeedsSystem : MonoBehaviour
     void Awake()
     {
         Instancia = this;
-        _comida = Mathf.Clamp(comida.valorInicial, 0, 100);
-        _salud = Mathf.Clamp(salud.valorInicial, 0, 100);
-        _energia = Mathf.Clamp(energia.valorInicial, 0, 100);
+        _comida = Mathf.Clamp(comida.valorInicial, 0, 200);
+        _salud = Mathf.Clamp(salud.valorInicial, 0, 200);
+        _energia = Mathf.Clamp(energia.valorInicial, 0, 200);
     }
 
     void Start()
@@ -123,10 +123,10 @@ public class NeedsSystem : MonoBehaviour
         };
     }
 
-    void Modificar(NeedType t, int delta)
+    public void Modificar(NeedType t, int delta)
     {
         int v = GetValor(t) + delta;
-        v = Mathf.Clamp(v, 0, 100);
+        v = Mathf.Clamp(v, 0, 200);
 
         switch (t)
         {

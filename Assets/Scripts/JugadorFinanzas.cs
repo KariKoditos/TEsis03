@@ -36,6 +36,8 @@ public class JugadorFinanzas : MonoBehaviour
     Coroutine rutinaAhorro;
     private Coroutine rutinaInteres;
 
+
+
     private void Awake()
     {
         if (instancia == null) instancia = this;
@@ -142,6 +144,9 @@ public class JugadorFinanzas : MonoBehaviour
             return;
         }
 
+        ItemEspacial copia = ScriptableObject.Instantiate(item);
+        inventario.Add(copia);
+
         // Usa helper: valida fondos, descuenta y refresca UI automáticamente
         if (!TryGastarCreditos(item.costo))
         {
@@ -149,15 +154,23 @@ public class JugadorFinanzas : MonoBehaviour
             return;
         }
 
-        // Instancia segura del ScriptableObject (evitas compartir la referencia de la tienda)
-        ItemEspacial copia = ScriptableObject.Instantiate(item);
-        inventario.Add(copia);
+        if (copia.tipo == TipoItem.Prevención)
+        {
+            ShipIncidentManager.Instancia?.ResolverConItem(copia.nombre);
+            NotificationManager.Instancia?.Notify($"El incidente ha sido resuelto gracias a {copia.nombre}.",NotificationType.Success);
 
-        // Solo refrescamos inventario; créditos ya se refrescaron
-        UIManager.instancia?.ActualizarInventarioUI(inventario);
+
+        }
+
+
+
+        
+        UIManager.instancia.ActualizarInventarioUI(inventario); //refresh creditos inv
 
         hizoCompra = true;
         VerificarDesbloqueoInversiones();
+
+
 
         Debug.Log($"Compraste: {item.nombre}. Créditos restantes: {creditos}");
 

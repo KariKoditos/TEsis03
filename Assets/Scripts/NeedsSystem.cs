@@ -17,7 +17,7 @@ public class NeedStatusConf
 {
     public NeedType tipo;
     [Range(0, 100)] public int valorInicial = 100;
-    [Range(0, 10)] public int decaimientoPorTick = 1; // cuánto baja cada tick
+    [Range(0, 10)] public int decaimientoPorTick = 1; 
 }
 
 public class NeedsSystem : MonoBehaviour
@@ -29,13 +29,21 @@ public class NeedsSystem : MonoBehaviour
     public NeedStatusConf salud = new NeedStatusConf { tipo = NeedType.Salud, valorInicial = 100, decaimientoPorTick = 1 };
     public NeedStatusConf energia = new NeedStatusConf { tipo = NeedType.Energia, valorInicial = 100, decaimientoPorTick = 1 };
 
-    [Tooltip("Cada cuántos segundos aplica el decaimiento")]
+    [Header("Alertas")]
+    [Range(1, 99)] public int umbralAlerta = 40;
+    
+    public int resetAlertaOffset = 5;
+
+
     public float tickSeconds = 3f;
 
     int _comida, _salud, _energia;
     float _t;
+    public bool usarTiempoReal = true;
 
     public bool debugLogs = true;
+    bool alertComidaEnviada, alertSaludEnviada, alertEnergiaEnviada;
+
 
     // Eventos para UI/derrota
     public event Action<NeedType, int> OnNeedChanged;
@@ -59,7 +67,7 @@ public class NeedsSystem : MonoBehaviour
 
     void Update()
     {
-        _t += Time.deltaTime;
+        _t += usarTiempoReal ? Time.unscaledDeltaTime : Time.deltaTime; // <-- clave
         if (_t >= tickSeconds)
         {
             _t = 0f;
@@ -104,6 +112,17 @@ public class NeedsSystem : MonoBehaviour
         };
     }
 
+    public int GetValor(NecesidadTipo n)
+    {
+        return n switch
+        {
+            NecesidadTipo.Comida => GetValor(NeedType.Comida),
+            NecesidadTipo.Salud => GetValor(NeedType.Salud),
+            NecesidadTipo.Energia => GetValor(NeedType.Energia),
+            _ => 0
+        };
+    }
+
     void Modificar(NeedType t, int delta)
     {
         int v = GetValor(t) + delta;
@@ -119,11 +138,41 @@ public class NeedsSystem : MonoBehaviour
         OnNeedChanged?.Invoke(t, v);
 
         if (v <= 0)
-            OnAnyNeedZero?.Invoke(); // aquí disparas derrota si quieres
+            OnAnyNeedZero?.Invoke();
+
+        ChecarAlertas(t, v);
     }
 
+    void ChecarAlertas(NeedType t, int v)
+    {
+        ref bool flag = ref alertComidaEnviada;
+        if (t == NeedType.Salud) flag = ref alertSaludEnviada;
+        if (t == NeedType.Energia) flag = ref alertEnergiaEnviada;
 
-    
+        if (v <= umbralAlerta && !flag)
+        {
+            flag = true;
+
+            // texto amigable + sugerencia rápida
+            string sugerencia = t switch
+            {
+                NeedType.Comida => "Compra/usa comida.",
+                NeedType.Salud => "Compra/usa kit médico.",
+                NeedType.Energia => "Compra/usa una Soda.",
+                _ => "Revisa la tienda."
+            };
+
+            NotificationManager.Instancia?.Notify(
+                $" {t} baja: {v}%. {sugerencia}",
+                NotificationType.Warning
+            );
+        }
+
+        // si recupera por encima del umbral + offset, permitimos volver a alertar en el futuro
+        if (flag && v >= umbralAlerta + resetAlertaOffset)
+            flag = false;
+    }
+
 
 
 }

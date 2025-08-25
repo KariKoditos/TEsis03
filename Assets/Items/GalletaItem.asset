@@ -20,3 +20,6 @@ MonoBehaviour:
   descripcion: 'Recupera +10 de barra de comida
 
 '
+  esSeguroNave: 0
+  satisface: 1
+  efectoNecesidad: 10

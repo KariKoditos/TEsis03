@@ -127,7 +127,18 @@ public class NotificationManager : MonoBehaviour
         // Devolver al pool
         go.SetActive(false);
         go.transform.SetParent(null);
+
+        var rt = go.GetComponent<RectTransform>();
+        if (rt)
+        {
+            rt.localScale = Vector3.one;
+            rt.sizeDelta = Vector2.zero;
+        }
+
         pool.Enqueue(go);
+
+
+
     }
 
     // === API para el panel de historial ===

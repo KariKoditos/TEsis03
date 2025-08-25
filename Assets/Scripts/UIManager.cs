@@ -208,11 +208,11 @@ public class UIManager : MonoBehaviour
 
         indexItemSeleccionado = index;
 
-        // Botón Vender
+        
         botonVender.onClick.RemoveAllListeners();
         botonVender.onClick.AddListener(() => VenderItem());
 
-        // Botón Usar -> llama a JugadorFinanzas
+        
         botonUsar.onClick.RemoveAllListeners();
         botonUsar.onClick.AddListener(() =>
         {
@@ -223,8 +223,15 @@ public class UIManager : MonoBehaviour
             indexItemSeleccionado = -1;
         });
 
-        // (Opcional) habilitar o no el botón según el tipo/efecto
+        
         bool usable = (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna);
+
+        if (usable && NeedsSystem.Instancia != null)
+        {
+            int actual = NeedsSystem.Instancia.GetValor(item.satisface);
+            usable = actual < 100; // si ya está llena, no dejar usar
+        }
+
         botonUsar.interactable = usable;
     }
 

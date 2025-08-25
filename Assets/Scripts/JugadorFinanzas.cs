@@ -18,12 +18,23 @@ public class JugadorFinanzas : MonoBehaviour
     public bool hizoVenta = false;
     public bool usoAhorro = false;
 
+    [Header("Interés de Ahorro")]
+    public bool ahorroGeneraInteres = true;
+    public float interesPorPeriodo = 1f;     
+    public float periodoInteresSegundos = 60f;
+
     [Header("Sistema de Inversión")]
     public int inversionesSegurasRealizadas = 2;
     public bool inversionesRiesgosasDesbloqueadas = false;
 
     [Header("Prevención / Seguro")]
     public bool tieneSeguro = false;
+
+    [SerializeField] 
+    float intervaloAhorroSegundos = 60f;
+    int ultimoAhorroNotificado = -1;
+    Coroutine rutinaAhorro;
+    private Coroutine rutinaInteres;
 
     private void Awake()
     {
@@ -37,6 +48,30 @@ public class JugadorFinanzas : MonoBehaviour
         UIManager.instancia?.ActualizarCreditos(creditos);
         UIManager.instancia?.ActualizarAhorro(saldoAhorro);
         UIManager.instancia?.ActualizarInventarioUI(inventario);
+    }
+
+    void OnEnable()
+    {
+        if (rutinaAhorro == null)
+            rutinaAhorro = StartCoroutine(NotificadorAhorro());
+
+        if (ahorroGeneraInteres && rutinaInteres == null)
+            rutinaInteres = StartCoroutine(RutinaInteresAhorro());
+    }
+
+    void OnDisable()
+    {
+        if (rutinaAhorro != null)
+        {
+            StopCoroutine(rutinaAhorro);
+            rutinaAhorro = null;
+        }
+
+        if (rutinaInteres != null)
+        {
+            StopCoroutine(rutinaInteres);
+            rutinaInteres = null;
+        }
     }
 
 
@@ -60,6 +95,7 @@ public class JugadorFinanzas : MonoBehaviour
 
         // Refresca ahorro en UI (créditos ya se refrescaron en TryGastarCreditos)
         RefrescarUIEconomia();
+        NotificationManager.Instancia?.Notify($" Depositaste {cantidad}. Ahorro: {saldoAhorro}", NotificationType.Success);
 
         Debug.Log($"Depositaste {cantidad} créditos. Saldo ahorro: {saldoAhorro}");
 
@@ -86,6 +122,8 @@ public class JugadorFinanzas : MonoBehaviour
 
         usoAhorro = true;
         VerificarDesbloqueoInversiones();
+
+        NotificationManager.Instancia?.Notify($" Retiraste {cantidad}. Ahorro: {saldoAhorro}", NotificationType.Info);
 
         Debug.Log($"Retiraste {cantidad} créditos. Saldo ahorro: {saldoAhorro}");
     }
@@ -176,7 +214,7 @@ public class JugadorFinanzas : MonoBehaviour
             return;
         }
 
-        // === NECESIDAD: rellena barra correspondiente ===
+        
         if (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna)
         {
             if (NeedsSystem.Instancia != null)
@@ -238,6 +276,12 @@ public class JugadorFinanzas : MonoBehaviour
         if (cantidad == 0) return;
         creditos = Mathf.Max(0, creditos + cantidad);
         RefrescarUIEconomia();
+
+        if (creditos <= 0)
+        {
+            Debug.Log("¡Game Over por créditos!");
+            GameOverUI.TriggerGameOver();
+        }
     }
 
     public bool TryGastarCreditos(int monto)
@@ -247,7 +291,39 @@ public class JugadorFinanzas : MonoBehaviour
 
         creditos -= monto;
         RefrescarUIEconomia();
+
+        if (creditos <= 0)
+        {
+            Debug.Log("¡Game Over por créditos!");
+            GameOverUI.TriggerGameOver();
+        }
+
         return true;
+    }
+
+    System.Collections.IEnumerator RutinaInteresAhorro()
+    {
+        var wait = new WaitForSecondsRealtime(periodoInteresSegundos);
+        while (true)
+        {
+            yield return wait;
+
+            if (!ahorroGeneraInteres) continue;
+            if (saldoAhorro <= 0) continue;
+
+            // calcula interés (mínimo 1 si hay saldo)
+            int interes = Mathf.Max(1, Mathf.FloorToInt(saldoAhorro * (interesPorPeriodo / 100f)));
+            saldoAhorro += interes;
+
+            // refresca UI
+            UIManager.instancia?.ActualizarAhorro(saldoAhorro);
+
+            // notificación (si tienes tu manager)
+            NotificationManager.Instancia?.Notify(
+                $" Tu ahorro generó +{interes} créditos. Total: {saldoAhorro}",
+                NotificationType.Success
+            );
+        }
     }
 
     private void RefrescarUIEconomia()
@@ -256,6 +332,23 @@ public class JugadorFinanzas : MonoBehaviour
         UIManager.instancia?.ActualizarAhorro(saldoAhorro);
     }
 
+    System.Collections.IEnumerator NotificadorAhorro()
+    {
+        var wait = new WaitForSecondsRealtime(intervaloAhorroSegundos);
+        while (true)
+        {
+            yield return wait;
 
+            // notifica sólo si cambió desde la última vez (si quieres siempre, elimina el if)
+            if (saldoAhorro != ultimoAhorroNotificado)
+            {
+                ultimoAhorroNotificado = saldoAhorro;
+                NotificationManager.Instancia?.Notify(
+                    $"Ahorro actualizado: {saldoAhorro} créditos.",
+                    NotificationType.Info
+                );
+            }
+        }
+    }
 
 }

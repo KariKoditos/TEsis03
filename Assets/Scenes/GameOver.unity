@@ -591,7 +591,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mi progreso
+  m_text: Regresar al Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8134cffb286252a438e41648069f78bd, type: 2}
   m_sharedMaterial: {fileID: 7885808047927114673, guid: 8134cffb286252a438e41648069f78bd, type: 2}
@@ -1045,30 +1045,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 840804631}
-  - component: {fileID: 840804630}
+  - component: {fileID: 840804632}
   m_Layer: 0
-  m_Name: GameOverUI
+  m_Name: GameOver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &840804630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 840804629}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f327cb4d53815064fa461ee5a39f2a12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  escenaGameOver: GameOver
-  escenaJuego: Game
-  escenaMenu: MainMenu
-  delaySegundos: 2
 --- !u!4 &840804631
 Transform:
   m_ObjectHideFlags: 0
@@ -1084,6 +1068,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &840804632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840804629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f327cb4d53815064fa461ee5a39f2a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  escenaGameOver: GameOver
+  escenaJuego: Game
+  escenaMenu: MainMenu
+  delaySegundos: 2
 --- !u!1 &877458768
 GameObject:
   m_ObjectHideFlags: 0
@@ -1454,7 +1454,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 241, y: -76.8}
+  m_AnchoredPosition: {x: -225, y: -79.5}
   m_SizeDelta: {x: 204.264, y: 46.7486}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1385571641
@@ -1500,7 +1500,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1385571642}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 840804632}
+        m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
+        m_MethodName: IrAlMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1385571642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1970,7 +1982,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 840804630}
+      - m_Target: {fileID: 840804632}
         m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
         m_MethodName: SalirDelJuego
         m_Mode: 1
@@ -2190,7 +2202,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -246.6, y: -84}
+  m_AnchoredPosition: {x: 202.4, y: -84}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2111569062
@@ -2237,7 +2249,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 840804630}
+      - m_Target: {fileID: 840804632}
         m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
         m_MethodName: Reiniciar
         m_Mode: 1

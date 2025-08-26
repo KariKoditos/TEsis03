@@ -17,6 +17,7 @@ public class JugadorFinanzas : MonoBehaviour
     public bool hizoCompra = false;
     public bool hizoVenta = false;
     public bool usoAhorro = false;
+    public bool inversionesDesbloqueadas { get; private set; } = false;
 
     [Header("Interés de Ahorro")]
     public bool ahorroGeneraInteres = true;
@@ -92,10 +93,10 @@ public class JugadorFinanzas : MonoBehaviour
             return;
         }
 
-        // Si sí alcanzó, mueve al ahorro
+        
         saldoAhorro += cantidad;
 
-        // Refresca ahorro en UI (créditos ya se refrescaron en TryGastarCreditos)
+        
         RefrescarUIEconomia();
         NotificationManager.Instancia?.Notify($" Depositaste {cantidad}. Ahorro: {saldoAhorro}", NotificationType.Success);
 
@@ -119,7 +120,7 @@ public class JugadorFinanzas : MonoBehaviour
 
         saldoAhorro -= cantidad;
 
-        // Suma a créditos y refresca UI con helper
+        
         AgregarCreditos(cantidad);
 
         usoAhorro = true;
@@ -263,13 +264,21 @@ public class JugadorFinanzas : MonoBehaviour
         Debug.Log($"'{item.nombre}' no tiene efecto de necesidad. Tipo: {item.tipo}");
     }
 
-    void VerificarDesbloqueoInversiones()
+     void VerificarDesbloqueoInversiones()
     {
-        if (hizoCompra && hizoVenta && usoAhorro)
+        if (!inversionesDesbloqueadas &&  hizoCompra && hizoVenta && usoAhorro)
         {
-            UIManager.instancia.ActivarBotonInversion();
-            Debug.Log("¡Mecánica de inversión desbloqueada!");
+            inversionesDesbloqueadas = true;
+
+            NotificationManager.Instancia?.Notify("¡Has desbloqueado las inversiones! Busca la estación de inversión para comenzar.", NotificationType.Success);
+
+            
         }
+    }
+
+    public bool PuedeInvertir()
+    {
+        return inversionesDesbloqueadas;
     }
 
     public void RegistrarInversionSegura()

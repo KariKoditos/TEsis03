@@ -7,10 +7,10 @@ public class GameOverUI : MonoBehaviour
     [Header("Escena a cargar cuando una necesidad llegue a 0")]
     public string escenaGameOver;
 
-    [Header("Escena de Juego (para reiniciar)")]
+    [Header("Escena de Juego ")]
     public string escenaJuego;
 
-    [Header("Escena de Menú Principal (opcional)")]
+    [Header("Escena de Menú Principal ")]
     public string escenaMenu;
 
     [Tooltip("Segundos de espera antes de cambiar de escena (por si quieres audio/FX).")]
@@ -20,17 +20,17 @@ public class GameOverUI : MonoBehaviour
 
     void Awake()
     {
-        // >>> FALTABAAAA <<< 
+        
         instancia = this;
 
-        // Asegurar que el tiempo corre normal
+        
         Time.timeScale = 1f;
 
-        // Mostrar cursor y desbloquearlo
+        
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        // Garantizar que exista un EventSystem (para clicks de UI)
+        
         if (FindObjectOfType<EventSystem>() == null)
         {
             var go = new GameObject("EventSystem");
@@ -83,6 +83,12 @@ public class GameOverUI : MonoBehaviour
             return;
         }
         SceneManager.LoadScene(escenaJuego, LoadSceneMode.Single);
+    }
+
+    public void IrAlMenu()
+    {
+        if (!string.IsNullOrEmpty(escenaMenu))
+            SceneManager.LoadScene(escenaMenu, LoadSceneMode.Single);
     }
 
     public void SalirDelJuego()

@@ -36,7 +36,6 @@ public class UIManager : MonoBehaviour
     public TMP_InputField inputCantidadAhorro;
 
     [Header("Inversiones")]
-    public Button botonInversion;
     public GameObject panelInversion;
     public TMP_InputField inputCantidadInversion;
     public TMP_Text textoCreditosInversion;
@@ -63,7 +62,7 @@ public class UIManager : MonoBehaviour
 
     public void Start()
     {
-        botonInversion.gameObject.SetActive(false);
+        
 
     }
 
@@ -297,18 +296,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ActivarBotonInversion()
-    {
-        if (botonInversion != null)
-        {
-            botonInversion.gameObject.SetActive(true);
-            Debug.Log("Botón de inversión activado");
-        }
-        else
-        {
-            Debug.LogWarning("No se asignó el botón de inversión en el inspector");
-        }
-    }
 
     public void MostrarPanelInversion()
     {

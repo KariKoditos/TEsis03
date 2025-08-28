@@ -8,4 +8,9 @@ public class CambioEscena : MonoBehaviour
         Debug.Log("Botón presionado, intentando cargar escena");
         SceneManager.LoadScene("Game");
     }
+
+    public void SalirDelJuego()
+    {
+        Application.Quit();
+    }
 }

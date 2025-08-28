@@ -16,7 +16,7 @@ MonoBehaviour:
   descripcion: Caray parece que algun cable se esta incendiando en la nave...
   solucion: 0
   itemRequerido: {fileID: 11400000, guid: 6d102e58e9bcb1a41be0867e93e3f083, type: 2}
-  tipoRequerido: 0
+  tipoRequerido: 3
   costoReparacion: 150
   consumirItemAlUsar: 1
   tiempoLimite: 60

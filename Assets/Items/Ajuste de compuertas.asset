@@ -16,7 +16,7 @@ MonoBehaviour:
   descripcion: Las puertas andan fallando la toolbox te ayuda a arreglarlo
   solucion: 0
   itemRequerido: {fileID: 11400000, guid: c499b544235480b42a50aed18d28719e, type: 2}
-  tipoRequerido: 0
+  tipoRequerido: 3
   costoReparacion: 0
   consumirItemAlUsar: 1
   tiempoLimite: 40

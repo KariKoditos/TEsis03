@@ -17,7 +17,7 @@ MonoBehaviour:
     rapido.
   solucion: 0
   itemRequerido: {fileID: 11400000, guid: 6f75ec75d23b60e4083723f36aad376b, type: 2}
-  tipoRequerido: 0
+  tipoRequerido: 3
   costoReparacion: 0
   consumirItemAlUsar: 1
   tiempoLimite: 60

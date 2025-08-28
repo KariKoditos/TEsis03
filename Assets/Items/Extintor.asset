@@ -16,7 +16,7 @@ MonoBehaviour:
   costo: 150
   valorVenta: 75
   icono: {fileID: 21300000, guid: 2eea99e7309c2d346817264baa600ba0, type: 3}
-  tipo: 0
+  tipo: 3
   descripcion: Te ayuda en situaciones involucradas con fuego = peligro.
   consumible: 1
   esSeguroNave: 0

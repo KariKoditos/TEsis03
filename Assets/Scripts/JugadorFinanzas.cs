@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class JugadorFinanzas : MonoBehaviour
 {
     public static JugadorFinanzas instancia;
 
-    [Header("Economía")]
+    [Header("EconomÃ­a")]
     public int creditos = 1000;
     public int saldoAhorro = 0;
 
@@ -13,22 +13,22 @@ public class JugadorFinanzas : MonoBehaviour
     public int maxInventario = 5;
     public List<ItemEspacial> inventario = new List<ItemEspacial>();
 
-    [Header("Progresión / Desbloqueos")]
+    [Header("ProgresiÃ³n / Desbloqueos")]
     public bool hizoCompra = false;
     public bool hizoVenta = false;
     public bool usoAhorro = false;
     public bool inversionesDesbloqueadas { get; private set; } = false;
 
-    [Header("Interés de Ahorro")]
+    [Header("InterÃ©s de Ahorro")]
     public bool ahorroGeneraInteres = true;
     public float interesPorPeriodo = 1f;     
     public float periodoInteresSegundos = 60f;
 
-    [Header("Sistema de Inversión")]
+    [Header("Sistema de InversiÃ³n")]
     public int inversionesSegurasRealizadas = 2;
     public bool inversionesRiesgosasDesbloqueadas = false;
 
-    [Header("Prevención / Seguro")]
+    [Header("PrevenciÃ³n / Seguro")]
     public bool tieneSeguro = false;
 
     [SerializeField] 
@@ -37,7 +37,7 @@ public class JugadorFinanzas : MonoBehaviour
     Coroutine rutinaAhorro;
     private Coroutine rutinaInteres;
 
-
+    bool consumido = false;
 
     private void Awake()
     {
@@ -82,14 +82,14 @@ public class JugadorFinanzas : MonoBehaviour
     {
         if (cantidad <= 0)
         {
-            Debug.Log("Cantidad inválida para depositar.");
+            Debug.Log("Cantidad invÃ¡lida para depositar.");
             return;
         }
 
-        // Intenta gastar desde créditos (valida fondos y refresca UI)
+        // Intenta gastar desde crÃ©ditos (valida fondos y refresca UI)
         if (!TryGastarCreditos(cantidad))
         {
-            Debug.Log("No tienes suficientes créditos para depositar esa cantidad.");
+            Debug.Log("No tienes suficientes crÃ©ditos para depositar esa cantidad.");
             return;
         }
 
@@ -100,7 +100,7 @@ public class JugadorFinanzas : MonoBehaviour
         RefrescarUIEconomia();
         NotificationManager.Instancia?.Notify($" Depositaste {cantidad}. Ahorro: {saldoAhorro}", NotificationType.Success);
 
-        Debug.Log($"Depositaste {cantidad} créditos. Saldo ahorro: {saldoAhorro}");
+        Debug.Log($"Depositaste {cantidad} crÃ©ditos. Saldo ahorro: {saldoAhorro}");
 
     }
 
@@ -108,7 +108,7 @@ public class JugadorFinanzas : MonoBehaviour
     {
         if (cantidad <= 0)
         {
-            Debug.Log("Cantidad inválida para retirar.");
+            Debug.Log("Cantidad invÃ¡lida para retirar.");
             return;
         }
 
@@ -128,7 +128,7 @@ public class JugadorFinanzas : MonoBehaviour
 
         NotificationManager.Instancia?.Notify($" Retiraste {cantidad}. Ahorro: {saldoAhorro}", NotificationType.Info);
 
-        Debug.Log($"Retiraste {cantidad} créditos. Saldo ahorro: {saldoAhorro}");
+        Debug.Log($"Retiraste {cantidad} crÃ©ditos. Saldo ahorro: {saldoAhorro}");
     }
 
     public void Comprar(ItemEspacial item)
@@ -141,21 +141,21 @@ public class JugadorFinanzas : MonoBehaviour
 
         if (inventario.Count >= maxInventario)
         {
-            Debug.Log("Inventario lleno. No puedes comprar más objetos.");
+            Debug.Log("Inventario lleno. No puedes comprar mÃ¡s objetos.");
             return;
         }
 
         ItemEspacial copia = ScriptableObject.Instantiate(item);
         inventario.Add(copia);
 
-        // Usa helper: valida fondos, descuenta y refresca UI automáticamente
+        // Usa helper: valida fondos, descuenta y refresca UI automÃ¡ticamente
         if (!TryGastarCreditos(item.costo))
         {
-            Debug.Log("No tienes suficientes créditos para comprar este ítem.");
+            Debug.Log("No tienes suficientes crÃ©ditos para comprar este Ã­tem.");
             return;
         }
 
-        if (copia.tipo == TipoItem.Prevención)
+        if (copia.tipo == TipoItem.PrevenciÃ³n)
         {
             ShipIncidentManager.Instancia?.ResolverConItem(copia.nombre);
             NotificationManager.Instancia?.Notify($"El incidente ha sido resuelto gracias a {copia.nombre}.",NotificationType.Success);
@@ -173,7 +173,7 @@ public class JugadorFinanzas : MonoBehaviour
 
 
 
-        Debug.Log($"Compraste: {item.nombre}. Créditos restantes: {creditos}");
+        Debug.Log($"Compraste: {item.nombre}. CrÃ©ditos restantes: {creditos}");
 
     }
 
@@ -181,14 +181,14 @@ public class JugadorFinanzas : MonoBehaviour
     {
         if (index < 0 || index >= inventario.Count)
         {
-            Debug.Log("No hay ítem en este slot para vender.");
+            Debug.Log("No hay Ã­tem en este slot para vender.");
             return;
         }
 
         ItemEspacial item = inventario[index];
         inventario.RemoveAt(index);
 
-        // Suma créditos y refresca UI con helper
+        // Suma crÃ©ditos y refresca UI con helper
         AgregarCreditos(item.valorVenta);
 
         // Refresca inventario en UI
@@ -197,7 +197,7 @@ public class JugadorFinanzas : MonoBehaviour
         hizoVenta = true;
         VerificarDesbloqueoInversiones();
 
-        Debug.Log($"Vendiste: {item.nombre}. Créditos actuales: {creditos}");
+        Debug.Log($"Vendiste: {item.nombre}. CrÃ©ditos actuales: {creditos}");
     }
 
 
@@ -214,63 +214,75 @@ public class JugadorFinanzas : MonoBehaviour
     {
         if (index < 0 || index >= inventario.Count)
         {
-            Debug.LogWarning("Índice fuera de rango al intentar usar ítem.");
+            Debug.LogWarning("Ãndice fuera de rango al intentar usar Ã­tem.");
             return;
         }
-        UsarItem(inventario[index], index);
+
+        // IMPORTANTE: que UsarItem devuelva si fue consumido/eliminado
+        bool consumido = UsarItem(inventario[index], index);
+
+        // ðŸ”¹ Refrescar SIEMPRE la UI del inventario
+        UIManager.instancia?.ActualizarInventarioUI(inventario);
     }
 
-    public void UsarItem(ItemEspacial item, int indexEnInventario = -1)
+    public bool UsarItem(ItemEspacial item, int indexEnInventario = -1)
     {
         if (item == null)
         {
             Debug.LogWarning("Item nulo al intentar usar.");
-            return;
+            return false;
         }
 
-        
-        if (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna)
+        bool consumido = false;
+
+        // --- 1) Ãtems de NECESIDAD (comida/salud/energÃ­a) ---
+        if (item.tipo == TipoItem.Necesidad &&
+            item.efectoNecesidad > 0 &&
+            item.satisface != NecesidadTipo.Ninguna)
         {
             if (NeedsSystem.Instancia != null)
             {
                 NeedsSystem.Instancia.AplicarEfecto(item.satisface, item.efectoNecesidad);
-                Debug.Log($"Usaste {item.nombre}: +{item.efectoNecesidad} a {item.satisface}");
             }
-            else
-            {
-                Debug.LogWarning("NeedsSystem.Instancia es null. Asegúrate de tener el NeedsSystem en la escena.");
-            }
-
-            // Consumible -> se elimina del inventario
-            if (indexEnInventario >= 0) EliminarItem(indexEnInventario);
-            return;
+            consumido = true; // se consumen al usar
         }
-
-        if (item.tipo == TipoItem.Prevención)
+        // --- 2) Ãtems de PREVENCIÃ“N (si quieres que se consuman) ---
+        else if (item.tipo == TipoItem.PrevenciÃ³n)
         {
+            // ejemplo simple de â€œseguro naveâ€ u otro flag tuyo
             tieneSeguro = true;
-            Debug.Log(" Seguro de nave activado.");
-            if (indexEnInventario >= 0) EliminarItem(indexEnInventario); // si es consumible
-            return;
+            consumido = true; // pon false si NO quieres que desaparezca del inventario
         }
-
-        if (item.tipo == TipoItem.Inversión)
+        // --- 3) Ãtems de INVERSIÃ“N: no se usan aquÃ­ ---
+        else if (item.tipo == TipoItem.InversiÃ³n)
         {
-            Debug.Log("Este ítem es de inversión. Usa tu panel/sistema de inversiones para gestionarlo.");
-            return;
+            Debug.Log("Este Ã­tem es de inversiÃ³n. Usa el panel de inversiones.");
+            consumido = false;
         }
 
-        
-        Debug.Log($"'{item.nombre}' no tiene efecto de necesidad. Tipo: {item.tipo}");
+        // --- 4) Incidentes/eventos (si un Ã­tem resuelve el evento activo) ---
+        if (EventsManager.Instancia != null)
+        {
+            // Devuelve true si el evento se resolviÃ³ y la definiciÃ³n pide consumir el Ã­tem
+            bool consumidoPorEvento = EventsManager.Instancia.OnItemUsed(item);
+            consumido = consumido || consumidoPorEvento;
+        }
+
+        // --- 5) Eliminar del inventario si corresponde ---
+        if (consumido && indexEnInventario >= 0)
+            EliminarItem(indexEnInventario);
+
+        return consumido;
     }
 
-     void VerificarDesbloqueoInversiones()
+
+    void VerificarDesbloqueoInversiones()
     {
         if (!inversionesDesbloqueadas &&  hizoCompra && hizoVenta && usoAhorro)
         {
             inversionesDesbloqueadas = true;
 
-            NotificationManager.Instancia?.Notify("¡Has desbloqueado las inversiones! Busca la estación de inversión para comenzar.", NotificationType.Success);
+            NotificationManager.Instancia?.Notify("Â¡Has desbloqueado las inversiones! Busca la estaciÃ³n de inversiÃ³n para comenzar.", NotificationType.Success);
 
             
         }
@@ -301,7 +313,7 @@ public class JugadorFinanzas : MonoBehaviour
 
         if (creditos <= 0)
         {
-            Debug.Log("¡Game Over por créditos!");
+            Debug.Log("Â¡Game Over por crÃ©ditos!");
             GameOverUI.TriggerGameOver();
         }
     }
@@ -316,7 +328,7 @@ public class JugadorFinanzas : MonoBehaviour
 
         if (creditos <= 0)
         {
-            Debug.Log("¡Game Over por créditos!");
+            Debug.Log("Â¡Game Over por crÃ©ditos!");
             GameOverUI.TriggerGameOver();
         }
 
@@ -333,16 +345,16 @@ public class JugadorFinanzas : MonoBehaviour
             if (!ahorroGeneraInteres) continue;
             if (saldoAhorro <= 0) continue;
 
-            // calcula interés (mínimo 1 si hay saldo)
+            // calcula interÃ©s (mÃ­nimo 1 si hay saldo)
             int interes = Mathf.Max(1, Mathf.FloorToInt(saldoAhorro * (interesPorPeriodo / 100f)));
             saldoAhorro += interes;
 
             // refresca UI
             UIManager.instancia?.ActualizarAhorro(saldoAhorro);
 
-            // notificación (si tienes tu manager)
+            // notificaciÃ³n (si tienes tu manager)
             NotificationManager.Instancia?.Notify(
-                $" Tu ahorro generó +{interes} créditos. Total: {saldoAhorro}",
+                $" Tu ahorro generÃ³ +{interes} crÃ©ditos. Total: {saldoAhorro}",
                 NotificationType.Success
             );
         }
@@ -361,16 +373,19 @@ public class JugadorFinanzas : MonoBehaviour
         {
             yield return wait;
 
-            // notifica sólo si cambió desde la última vez (si quieres siempre, elimina el if)
+            // notifica sÃ³lo si cambiÃ³ desde la Ãºltima vez (si quieres siempre, elimina el if)
             if (saldoAhorro != ultimoAhorroNotificado)
             {
                 ultimoAhorroNotificado = saldoAhorro;
                 NotificationManager.Instancia?.Notify(
-                    $"Ahorro actualizado: {saldoAhorro} créditos.",
+                    $"Ahorro actualizado: {saldoAhorro} crÃ©ditos.",
                     NotificationType.Info
                 );
             }
         }
     }
+
+
+    
 
 }

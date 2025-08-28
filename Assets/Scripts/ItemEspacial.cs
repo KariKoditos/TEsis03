@@ -13,6 +13,9 @@ public class ItemEspacial : ScriptableObject
     [TextArea(2, 4)]    
     public string descripcion;
 
+    [Header("Uso general")]
+    public bool consumible = true;
+
     [Header("Prevención / Seguro")]
     public bool esSeguroNave = false;
 

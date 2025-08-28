@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5d92f62289981488490259336eb7d8, type: 3}
+  m_Name: EventoExtintor
+  m_EditorClassIdentifier: 
+  titulo: Extintor
+  descripcion: Caray parece que algun cable se esta incendiando en la nave...
+  solucion: 0
+  itemRequerido: {fileID: 11400000, guid: 6d102e58e9bcb1a41be0867e93e3f083, type: 2}
+  tipoRequerido: 0
+  costoReparacion: 150
+  consumirItemAlUsar: 1
+  tiempoLimite: 60
+  multaCreditos: 200
+  "da\xF1oSalud": 30
+  "da\xF1oEnergia": 25
+  recompensaCreditos: 0

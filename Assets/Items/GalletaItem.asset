@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GalletaItem
   m_EditorClassIdentifier: 
   nombre: Galleta
-  costo: 25
-  valorVenta: 15
+  costo: 20
+  valorVenta: 10
   icono: {fileID: 21300000, guid: 335df039c2ec0154694576e64b85ff5f, type: 3}
   tipo: 0
   descripcion: 'Recupera +30 de barra de comida
@@ -22,4 +22,4 @@ MonoBehaviour:
 '
   esSeguroNave: 0
   satisface: 1
-  efectoNecesidad: 30
+  efectoNecesidad: 25

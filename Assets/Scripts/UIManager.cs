@@ -198,40 +198,39 @@ public class UIManager : MonoBehaviour
 
     public void MostrarDetallesItem(ItemEspacial item, int index)
     {
-        panelDetalles.SetActive(true);
-        imagenGrande.sprite = item.icono;
-        textoNombre.text = item.nombre;
-        Debug.Log($"Descripción cargada: {item.descripcion}");
-        textoDescripcion.text = item.descripcion;
-        textoValorVenta.text = $"Venta: ${item.valorVenta}";
+        if (item == null) return;
 
+        panelDetalles.SetActive(true);
+
+        // Rellenar UI
+        if (imagenGrande) imagenGrande.sprite = item.icono;
+        if (textoNombre) textoNombre.text = item.nombre;
+        if (textoDescripcion) textoDescripcion.text = item.descripcion;
+        if (textoValorVenta) textoValorVenta.text = $"Venta: ${item.valorVenta}";
+
+        // Guardar selección
         indexItemSeleccionado = index;
 
-        
+        // Botón Vender
         botonVender.onClick.RemoveAllListeners();
         botonVender.onClick.AddListener(() => VenderItem());
 
-        
+        // Botón Usar
         botonUsar.onClick.RemoveAllListeners();
         botonUsar.onClick.AddListener(() =>
         {
-            if (JugadorFinanzas.instancia != null)
+            if (JugadorFinanzas.instancia != null && indexItemSeleccionado >= 0)
+            {
                 JugadorFinanzas.instancia.UsarItemPorIndice(indexItemSeleccionado);
+                // UsarItemPorIndice ya refresca el inventario
+            }
 
             panelDetalles.SetActive(false);
             indexItemSeleccionado = -1;
         });
 
-        
-        bool usable = (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna);
-
-        if (usable && NeedsSystem.Instancia != null)
-        {
-            int actual = NeedsSystem.Instancia.GetValor(item.satisface);
-            usable = actual < 100; // si ya está llena, no dejar usar
-        }
-
-        botonUsar.interactable = usable;
+        // Habilitar/Deshabilitar botón USAR según el tipo/estado de la necesidad
+        botonUsar.interactable = EsUsable(item);
     }
 
     public void VenderItem()
@@ -249,15 +248,15 @@ public class UIManager : MonoBehaviour
     {
         if (textoCreditos != null)
             textoCreditos.text = $"CRÉDITOS: {cantidad}";
-
-        if (textoCreditosAhorro != null)
-            textoCreditosAhorro.text = $"CRÉDITOS: {cantidad}";
+        
+        // if (textoCreditosAhorro != null) textoCreditosAhorro.text = $"CRÉDITOS: {cantidad}";
     }
 
     public void ActualizarAhorro(int cantidad)
     {
         if (textoAhorro != null)
             textoAhorro.text = $"AHORRO: {cantidad}";
+       
     }
 
     public void DepositarDesdeUI()
@@ -388,5 +387,26 @@ public class UIManager : MonoBehaviour
         panelDetalles.SetActive(false);
         indexItemSeleccionado = -1;
     }
+
+    private bool EsUsable(ItemEspacial item)
+    {
+        // 1) Necesidades: solo si la barra no está llena
+        if (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna)
+        {
+            if (NeedsSystem.Instancia == null) return true;
+            return NeedsSystem.Instancia.GetValor(item.satisface) < 100;
+        }
+
+        // 2) Si hay un evento activo que se resuelve con este item o su tipo
+        if (EventsManager.Instancia != null && EventsManager.Instancia.PuedeUsarseParaEvento(item))
+            return true;
+
+        // 3) Ítems de prevención: si quieres permitir activarlos manualmente
+        if (item.tipo == TipoItem.Prevención)
+            return true;
+
+        return false;
+    }
+
 
 }

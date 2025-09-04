@@ -21,5 +21,6 @@ MonoBehaviour:
     en la nave."
   consumible: 1
   esSeguroNave: 0
+  tagPrevencion: ToolBox
   satisface: 0
   efectoNecesidad: 0

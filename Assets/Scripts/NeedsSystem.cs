@@ -16,8 +16,8 @@ public enum NeedType
 public class NeedStatusConf
 {
     public NeedType tipo;
-    [Range(0, 100)] public int valorInicial = 200;
-    [Range(0, 10)] public int decaimientoPorTick = 1; 
+    [Range(0, 200)] public int valorInicial = 200;
+    [Range(0, 20)] public int decaimientoPorTick = 1; 
 }
 
 public class NeedsSystem : MonoBehaviour
@@ -25,9 +25,9 @@ public class NeedsSystem : MonoBehaviour
     public static NeedsSystem Instancia;
 
     [Header("Config")]
-    public NeedStatusConf comida = new NeedStatusConf { tipo = NeedType.Comida, valorInicial = 100, decaimientoPorTick = 1 };
-    public NeedStatusConf salud = new NeedStatusConf { tipo = NeedType.Salud, valorInicial = 100, decaimientoPorTick = 1 };
-    public NeedStatusConf energia = new NeedStatusConf { tipo = NeedType.Energia, valorInicial = 100, decaimientoPorTick = 1 };
+    public NeedStatusConf comida = new NeedStatusConf { tipo = NeedType.Comida, valorInicial = 200, decaimientoPorTick = 1 };
+    public NeedStatusConf salud = new NeedStatusConf { tipo = NeedType.Salud, valorInicial = 200, decaimientoPorTick = 1 };
+    public NeedStatusConf energia = new NeedStatusConf { tipo = NeedType.Energia, valorInicial = 200, decaimientoPorTick = 1 };
 
     [Header("Alertas")]
     [Range(1, 99)] public int umbralAlerta = 40;
@@ -51,7 +51,9 @@ public class NeedsSystem : MonoBehaviour
 
     void Awake()
     {
+        if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
+
         _comida = Mathf.Clamp(comida.valorInicial, 0, 200);
         _salud = Mathf.Clamp(salud.valorInicial, 0, 200);
         _energia = Mathf.Clamp(energia.valorInicial, 0, 200);

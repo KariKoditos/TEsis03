@@ -27,11 +27,15 @@ public class NeedBarUI : MonoBehaviour
     {
         if (NeedsSystem.Instancia != null)
             NeedsSystem.Instancia.OnNeedChanged -= OnNeedChanged;
+
+        _subscrito = false;
     }
 
     void LateUpdate()
     {
-        // plan B: si por alguna razón no llegan eventos, sincroniza por frame
+        if (!_subscrito) IntentarSuscribir();
+
+        // Plan B: mientras no haya suscripción, sincroniza visual
         if (NeedsSystem.Instancia != null && !_subscrito)
             ActualizarVisual(NeedsSystem.Instancia.GetValor(tipo));
     }
@@ -53,16 +57,16 @@ public class NeedBarUI : MonoBehaviour
 
     void ActualizarVisual(int valor)
     {
-        float norm = Mathf.InverseLerp(0, 100, valor);
+        float norm = Mathf.InverseLerp(0, 200, valor);
 
         if (slider != null)
         {
             slider.minValue = 0;
-            slider.maxValue = 100;
+            slider.maxValue = 200;
             slider.value = valor;
         }
 
-        
+
 
     }
 }

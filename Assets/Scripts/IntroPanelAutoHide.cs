@@ -1,113 +1,85 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class IntroPanelAutoHide : MonoBehaviour
 {
-    [Header("Panel a mostrar al iniciar")]
-    public GameObject panel;                // Asigna tu panel de bienvenida
-    public float duracionSegundos = 5f;     // 5 por defecto
+    [Header("Panel de Controles / Ayuda")]
+    [SerializeField] GameObject panel;           // Asigna el panel en el Inspector
+    [SerializeField] float autoHideSeconds = 5f; // Solo en el primer arranque
+    [SerializeField] bool usarTiempoNoEscalado = true;
+    [SerializeField] KeyCode hotkey = KeyCode.T; // Tecla para abrir/cerrar
 
-    [Header("Comportamiento mientras está visible")]
-    public bool pausarJuego = false;        // Si quieres que no corra el tiempo
-    public bool bloquearMovimiento = true;  // Deshabilitar movimiento del jugador
-    public bool mostrarCursor = true;       // Mostrar cursor mientras el panel está activo
-    public KeyCode cerrarAnticipado = KeyCode.None; // p.ej. KeyCode.Space si quieres cerrar antes
-
-    [Header("Opcional")]
-    public FPSController controladorJugador;  // Arrastra tu FPSController si tienes uno
     
 
-    float timeScalePrevio = 1f;
-    bool activo = false;
+    const string SeenKey = "ControlsPanelSeen";  // PlayerPrefs flag
+    Coroutine rutina;
+
+ 
 
     void Start()
     {
-        if (!panel)
-        {
-            Debug.LogWarning("IntroPanelAutoHide: no hay panel asignado.");
-            return;
-        }
+        // Mostrar solo la primera vez y auto-ocultar
+        bool yaVisto = PlayerPrefs.GetInt(SeenKey, 0) == 1;
 
-        Mostrar();
-        // Usa tiempo REAL para el temporizador si pausas el juego, normal en caso contrario
-        if (pausarJuego) StartCoroutine(AutoOcultarRealtime());
-        else StartCoroutine(AutoOcultar());
+        if (!yaVisto)
+        {
+            Show();
+            // auto-hide una sola vez
+            if (rutina != null) StopCoroutine(rutina);
+            rutina = StartCoroutine(AutoHideOnce());
+            PlayerPrefs.SetInt(SeenKey, 1);
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            // En sesiones siguientes, arranca oculto pero disponible
+            Hide();
+        }
+    }
+
+    IEnumerator AutoHideOnce()
+    {
+        float t = 0f;
+        while (t < autoHideSeconds)
+        {
+            t += usarTiempoNoEscalado ? Time.unscaledDeltaTime : Time.deltaTime;
+            yield return null;
+        }
+        Hide();
+        rutina = null;
     }
 
     void Update()
     {
-        if (!activo) return;
-
-        if (cerrarAnticipado != KeyCode.None && Input.GetKeyDown(cerrarAnticipado))
-            Ocultar();
+        // Hotkey para abrir/cerrar en cualquier momento
+        if (Input.GetKeyDown(hotkey))
+            TogglePanel();
     }
 
-    void Mostrar()
+    public void TogglePanel()
     {
-        activo = true;
+        if (!panel) return;
+        bool next = !panel.activeSelf;
+        panel.SetActive(next);
+        // Opcional: libera/bloquea cursor si tu juego es FPS
+        Cursor.lockState = next ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = next;
+    }
+
+    public void Show()
+    {
+        if (!panel) return;
         panel.SetActive(true);
-
-        
-
-        if (pausarJuego)
-        {
-            timeScalePrevio = Time.timeScale;
-            Time.timeScale = 0f;
-        }
-
-        if (bloquearMovimiento && controladorJugador) controladorJugador.habilitarMovimiento = false;
-
-        if (mostrarCursor)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
-    public void Ocultar()
+    public void Hide()
     {
-        if (!activo) return;
-       
-
-        
-        else panel.SetActive(false);
-
-        if (pausarJuego) Time.timeScale = timeScalePrevio;
-
-        if (bloquearMovimiento && controladorJugador) controladorJugador.habilitarMovimiento = true;
-
-        // Opcional: si quieres volver a bloquear el cursor:
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-
-    IEnumerator AutoOcultar()
-    {
-        yield return new WaitForSeconds(duracionSegundos);
-        Ocultar();
-    }
-
-    IEnumerator AutoOcultarRealtime()
-    {
-        yield return new WaitForSecondsRealtime(duracionSegundos);
-        Ocultar();
-    }
-
-    IEnumerator Fade(CanvasGroup cg, float a, float b, float t)
-    {
-        float el = 0f;
-        while (el < t)
-        {
-            el += (pausarJuego ? Time.unscaledDeltaTime : Time.deltaTime);
-            cg.alpha = Mathf.Lerp(a, b, el / t);
-            yield return null;
-        }
-        cg.alpha = b;
-    }
-
-    IEnumerator FadeYApagar(CanvasGroup cg, float a, float b, float t)
-    {
-        yield return Fade(cg, a, b, t);
+        if (!panel) return;
         panel.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 }

@@ -20,5 +20,6 @@ MonoBehaviour:
   descripcion: Te ayuda en situaciones involucradas con fuego = peligro.
   consumible: 1
   esSeguroNave: 0
+  tagPrevencion: Extintor
   satisface: 0
   efectoNecesidad: 0

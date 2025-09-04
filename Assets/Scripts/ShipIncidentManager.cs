@@ -20,14 +20,14 @@ public class ShipIncidentManager : MonoBehaviour
     public int dañoEnergia = 10;
 
     [Header("Sugerencias / Ítems prevención")]
-    [Tooltip("Nombres clave que usarás como 'reparación' típica. No tienen que coincidir exacto con los assets.")]
-    public string[] etiquetasPrevencion = { "ToolBox", "Seguro", "Repuesto", "Kit de reparación" };
+    [Tooltip("Nombres clave/etiquetas que usará el incidente como 'requiredTag' (ej: Extintor, Seguro...).")]
+    public string[] etiquetasPrevencion = { "Extintor", "Seguro", "Repuesto", "Kit de reparación" };
 
     [Header("Sesgo a tienda (opcional)")]
-    public TiendaEspacial tienda;         // (si la asignas) le pedimos prevenir en la próxima rotación
+    public TiendaEspacial tienda;
     public bool forzarPrevencionEnSiguienteRotacion = true;
 
-    // Incidente en curso (uno a la vez, simple)
+    // Incidente en curso (uno a la vez)
     private PendingIncident incidenteActivo = null;
 
     // Plantillas de incidente
@@ -50,40 +50,42 @@ public class ShipIncidentManager : MonoBehaviour
 
     void OnEnable()
     {
+        // Suscribir resolver a través del bus de eventos
+        EventsManager.OnTryResolveIncidentWithItem += ResolverConItem;
         StartCoroutine(LoopIncidentes());
     }
 
     void OnDisable()
     {
+        EventsManager.OnTryResolveIncidentWithItem -= ResolverConItem;
         StopAllCoroutines();
     }
 
     IEnumerator LoopIncidentes()
     {
-        // Espera inicial aleatoria para que no caiga siempre al mismo tiempo
-        yield return new WaitForSecondsRealtime(Random.Range(5f, 12f));
+        // Espera inicial aleatoria
+        yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(5f, 12f));
 
         while (true)
         {
-            // Espera aleatoria entre incidentes
-            float espera = Random.Range(intervaloMinSeg, intervaloMaxSeg);
+            // Espera aleatoria entre incidentes (tiempo real)
+            float espera = UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg);
             yield return new WaitForSecondsRealtime(espera);
 
-            // Si ya hay uno activo, salta este ciclo
             if (incidenteActivo != null) continue;
 
             // Crea un incidente
-            string titulo = _plantillas[Random.Range(0, _plantillas.Length)];
-            string sugerido = etiquetasPrevencion.Length > 0
-                ? etiquetasPrevencion[Random.Range(0, etiquetasPrevencion.Length)]
-                : "herramienta de prevención";
+            string titulo = _plantillas[UnityEngine.Random.Range(0, _plantillas.Length)];
+            string required = (etiquetasPrevencion != null && etiquetasPrevencion.Length > 0)
+                ? etiquetasPrevencion[UnityEngine.Random.Range(0, etiquetasPrevencion.Length)]
+                : "Extintor"; // fallback sensato
 
-            int multa = Random.Range(multaMin, multaMax);
+            int multa = UnityEngine.Random.Range(multaMin, multaMax);
 
             incidenteActivo = new PendingIncident
             {
                 titulo = titulo,
-                sugerencia = sugerido,
+                requiredTag = required, // <- clave
                 multa = multa,
                 deadlineRealtime = Time.realtimeSinceStartup + tiempoParaResolverSeg,
                 resuelto = false
@@ -92,14 +94,17 @@ public class ShipIncidentManager : MonoBehaviour
             // Notificación
             NotificationManager.Instancia?.Notify(
                 $" Incidente: {titulo}\n" +
-                $"Sugerido: {sugerido}. Tienes {Mathf.RoundToInt(tiempoParaResolverSeg)}s para atenderlo.\n" +
+                $"Requiere: {required}. Tienes {Mathf.RoundToInt(tiempoParaResolverSeg)}s para atenderlo.\n" +
                 $"Multa si se ignora: {multa} créditos, -{dañoSalud} Salud, -{dañoEnergia} Energía.",
                 NotificationType.Warning
             );
 
-            // Sesgo: pedir a la tienda un ítem de prevención la próxima vez
+            // Anuncia por el bus (por si UI quiere mostrar pista)
+            EventsManager.EmitIncidentSpawned(required);
+
+            // Sesgo tienda
             if (forzarPrevencionEnSiguienteRotacion && tienda != null)
-                tienda.forzarCategorias = true; // ya favorece Prevención en tu lógica
+                tienda.forzarCategorias = true;
 
             // Esperar resolución o deadline
             yield return StartCoroutine(EsperarResolucionODefault());
@@ -112,7 +117,6 @@ public class ShipIncidentManager : MonoBehaviour
         {
             if (Time.realtimeSinceStartup >= incidenteActivo.deadlineRealtime)
             {
-                // Aplicar consecuencias
                 AplicarConsecuencias(incidenteActivo);
                 incidenteActivo = null;
                 yield break;
@@ -123,17 +127,15 @@ public class ShipIncidentManager : MonoBehaviour
 
     void AplicarConsecuencias(PendingIncident inc)
     {
-        // 1) Multa de créditos
+        // 1) Multa
         bool cobrado = false;
         if (JugadorFinanzas.instancia != null && inc.multa > 0)
-        {
             cobrado = JugadorFinanzas.instancia.TryGastarCreditos(inc.multa);
-        }
 
-        // 2) Daño a necesidades si no alcanzó (o igual quieres aplicarlo siempre)
+        // 2) Daño a necesidades
         if (NeedsSystem.Instancia != null)
         {
-            if (!cobrado) // si no pudo pagar, castigo más duro (opcional)
+            if (!cobrado)
             {
                 NeedsSystem.Instancia.Modificar(NeedType.Salud, -dañoSalud * 2);
                 NeedsSystem.Instancia.Modificar(NeedType.Energia, -dañoEnergia * 2);
@@ -151,53 +153,36 @@ public class ShipIncidentManager : MonoBehaviour
         );
     }
 
-    // ===== API pública para resolver con un ítem de Prevención =====
-
-    public bool ResolverConItem(string nombreItem)
+    // ===== Resolver vía bus (handler) =====
+    private bool ResolverConItem(ItemEspacial item)
     {
         if (incidenteActivo == null || incidenteActivo.resuelto) return false;
+        if (item == null || item.tipo != TipoItem.Prevención) return false;
 
-        // Simple: marcar resuelto por cualquier ítem de Prevención
-        incidenteActivo.resuelto = true;
-
-        NotificationManager.Instancia?.Notify(
-            $" Incidente resuelto con {nombreItem}. ¡Buen trabajo!",
-            NotificationType.Success
-        );
-        incidenteActivo = null;
-        return true;
-    }
-
-    // Resolver pagando manualmente (si quisieras un botón o acción directa)
-    public bool ResolverPagando(int costo)
-    {
-        if (incidenteActivo == null || incidenteActivo.resuelto) return false;
-
-        if (JugadorFinanzas.instancia != null && JugadorFinanzas.instancia.TryGastarCreditos(costo))
-        {
-            incidenteActivo.resuelto = true;
-            NotificationManager.Instancia?.Notify(
-                $" Pagaste {costo} créditos y se resolvió el incidente.",
-                NotificationType.Info
-            );
-            incidenteActivo = null;
-            return true;
-        }
-        else
+        if (!string.IsNullOrEmpty(incidenteActivo.requiredTag) &&
+            item.tagPrevencion != incidenteActivo.requiredTag)
         {
             NotificationManager.Instancia?.Notify(
-                $"No tienes créditos suficientes para pagar la reparación ({costo}).",
-                NotificationType.Warning
+                $"Necesitas {incidenteActivo.requiredTag} para este incidente.",
+                NotificationType.Warning, 4f
             );
             return false;
         }
+
+        incidenteActivo.resuelto = true;
+        NotificationManager.Instancia?.Notify(
+            $"Incidente resuelto con {item.nombre}.",
+            NotificationType.Success, 4f
+        );
+        incidenteActivo = null;
+        return true;
     }
 
     // Estructura interna
     private class PendingIncident
     {
         public string titulo;
-        public string sugerencia;
+        public string requiredTag;     // <--- añadido
         public int multa;
         public float deadlineRealtime;
         public bool resuelto;

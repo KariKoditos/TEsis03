@@ -20,5 +20,6 @@ MonoBehaviour:
   descripcion: Filtro avanzado que elimina impurezas del sistema de aire.
   consumible: 1
   esSeguroNave: 0
+  tagPrevencion: Repuesto
   satisface: 0
   efectoNecesidad: 0

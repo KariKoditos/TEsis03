@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -15,14 +15,13 @@ public class UIManager : MonoBehaviour
     [Header("Inventario")]
     public GameObject panelInventario;
     public TMP_Text[] textosSlots;
-    public Image[] iconosSlots;
+    public UnityEngine.UI.Image[] iconosSlots;  // tama√±o 5
+    public UnityEngine.UI.Button[] botonesUsar;   // tama√±o 5
+    public UnityEngine.UI.Button[] botonesVender; // tama√±o 5
+    
 
     [Header("Detalles de Item")]
-    public GameObject panelDetalles;
-    public Image imagenGrande;
-    public TMP_Text textoNombre;
-    public TMP_Text textoDescripcion;
-    public TMP_Text textoValorVenta;
+   
     public Button botonVender;
     public Button botonUsar;
 
@@ -47,6 +46,9 @@ public class UIManager : MonoBehaviour
     private bool riesgosDesbloqueados = false;
 
 
+
+    System.Collections.Generic.List<ItemEspacial> _invCache;
+
     [Header("PaneleNotificaciones")]
     public GameObject panelNotificaciones;
 
@@ -70,8 +72,8 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        if (instancia == null) instancia = this;
-        else Destroy(gameObject);
+        if (instancia != null && instancia != this) { Destroy(gameObject); return; }
+        instancia = this;
     }
 
 
@@ -84,19 +86,6 @@ public class UIManager : MonoBehaviour
                 OcultarInventario();
             else
                 MostrarInventario();
-        }
-
-        if (Input.GetKeyDown(KeyCode.P)) 
-        {
-            if (!panelInversion.activeSelf)
-            {
-                MostrarPanelInversion();
-            }
-            else
-            {
-                CerrarPanelInversiones();
-            }
-
         }
 
         if (Input.GetKeyDown(KeyCode.N))
@@ -131,6 +120,7 @@ public class UIManager : MonoBehaviour
         ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
     }
 
+
     public void MostrarNotificaciones()
     {
         panelNotificaciones.SetActive(true);
@@ -152,7 +142,6 @@ public class UIManager : MonoBehaviour
     {
         inventarioAbierto = false;
         panelInventario.SetActive(false);
-        panelDetalles.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Time.timeScale = 1f;
@@ -179,59 +168,61 @@ public class UIManager : MonoBehaviour
 
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)
     {
-        for (int i = 0; i < textosSlots.Length; i++)
+        int n = textosSlots.Length; // asume 5
+        for (int i = 0; i < n; i++)
         {
-            if (i < inventario.Count)
+            bool hayItem = (i < inventario.Count && inventario[i] != null);
+
+            // Pintar nombre + icono
+            if (hayItem)
             {
-                textosSlots[i].text = inventario[i].nombre;
-                iconosSlots[i].sprite = inventario[i].icono;
+                var it = inventario[i];
+                textosSlots[i].text = it.nombre;
+
+                iconosSlots[i].sprite = it.icono;
+                iconosSlots[i].preserveAspect = true;
                 iconosSlots[i].color = Color.white;
             }
             else
             {
-                textosSlots[i].text = "- VacÌo -";
+                textosSlots[i].text = "- Vac√≠o -";
                 iconosSlots[i].sprite = null;
                 iconosSlots[i].color = new Color(1, 1, 1, 0);
+            }
+
+            // Asegurar listeners correctos
+            if (i < botonesUsar.Length) botonesUsar[i].onClick.RemoveAllListeners();
+            if (i < botonesVender.Length) botonesVender[i].onClick.RemoveAllListeners();
+
+            if (hayItem)
+            {
+                int idx = i;
+                var it = inventario[idx];
+
+                if (i < botonesUsar.Length && botonesUsar[i])
+                {
+                    botonesUsar[i].onClick.AddListener(() =>
+                        JugadorFinanzas.instancia.UsarItemPorIndice(idx));
+                    bool sePuedeUsar = it.tipo == TipoItem.Necesidad || it.tipo == TipoItem.Prevenci√≥n;
+                    botonesUsar[i].interactable = sePuedeUsar;
+                }
+
+                if (i < botonesVender.Length && botonesVender[i])
+                {
+                    botonesVender[i].onClick.AddListener(() =>
+                        JugadorFinanzas.instancia.Vender(idx));
+                    botonesVender[i].interactable = true;
+                }
+            }
+            else
+            {
+                if (i < botonesUsar.Length && botonesUsar[i]) botonesUsar[i].interactable = false;
+                if (i < botonesVender.Length && botonesVender[i]) botonesVender[i].interactable = false;
             }
         }
     }
 
-    public void MostrarDetallesItem(ItemEspacial item, int index)
-    {
-        if (item == null) return;
-
-        panelDetalles.SetActive(true);
-
-        // Rellenar UI
-        if (imagenGrande) imagenGrande.sprite = item.icono;
-        if (textoNombre) textoNombre.text = item.nombre;
-        if (textoDescripcion) textoDescripcion.text = item.descripcion;
-        if (textoValorVenta) textoValorVenta.text = $"Venta: ${item.valorVenta}";
-
-        // Guardar selecciÛn
-        indexItemSeleccionado = index;
-
-        // BotÛn Vender
-        botonVender.onClick.RemoveAllListeners();
-        botonVender.onClick.AddListener(() => VenderItem());
-
-        // BotÛn Usar
-        botonUsar.onClick.RemoveAllListeners();
-        botonUsar.onClick.AddListener(() =>
-        {
-            if (JugadorFinanzas.instancia != null && indexItemSeleccionado >= 0)
-            {
-                JugadorFinanzas.instancia.UsarItemPorIndice(indexItemSeleccionado);
-                // UsarItemPorIndice ya refresca el inventario
-            }
-
-            panelDetalles.SetActive(false);
-            indexItemSeleccionado = -1;
-        });
-
-        // Habilitar/Deshabilitar botÛn USAR seg˙n el tipo/estado de la necesidad
-        botonUsar.interactable = EsUsable(item);
-    }
+  
 
     public void VenderItem()
     {
@@ -240,16 +231,16 @@ public class UIManager : MonoBehaviour
             JugadorFinanzas.instancia.Vender(indexItemSeleccionado);
             ActualizarCreditos(JugadorFinanzas.instancia.creditos);
             ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
-            panelDetalles.SetActive(false);
+            
         }
     }
 
     public void ActualizarCreditos(int cantidad)
     {
         if (textoCreditos != null)
-            textoCreditos.text = $"CR…DITOS: {cantidad}";
+            textoCreditos.text = $"CR√âDITOS: {cantidad}";
         
-        // if (textoCreditosAhorro != null) textoCreditosAhorro.text = $"CR…DITOS: {cantidad}";
+        // if (textoCreditosAhorro != null) textoCreditosAhorro.text = $"CR√âDITOS: {cantidad}";
     }
 
     public void ActualizarAhorro(int cantidad)
@@ -283,16 +274,6 @@ public class UIManager : MonoBehaviour
     {
         if (canvasTienda != null)
             canvasTienda.SetActive(false);
-    }
-
-    public void ActualizarPrecios(ItemEspacial[] items)
-    {
-        ButtonPrecio[] botones = canvasTienda.GetComponentsInChildren<ButtonPrecio>();
-
-        for (int i = 0; i < botones.Length && i < items.Length; i++)
-        {
-            botones[i].ActualizarTexto(items[i]);
-        }
     }
 
 
@@ -346,9 +327,9 @@ public class UIManager : MonoBehaviour
         // Refresca textos principales
         ActualizarCreditos(JugadorFinanzas.instancia.creditos);
 
-        // Refresca el texto de crÈditos visible dentro del panel de inversiones
+        // Refresca el texto de cr√©ditos visible dentro del panel de inversiones
         if (textoCreditosInversion != null)
-            textoCreditosInversion.text = $"CR…DITOS: {JugadorFinanzas.instancia.creditos}";
+            textoCreditosInversion.text = $"CR√âDITOS: {JugadorFinanzas.instancia.creditos}";
     }
 
     // === Desbloqueo de riesgosas ===
@@ -358,8 +339,8 @@ public class UIManager : MonoBehaviour
         if (!riesgosDesbloqueados && inversionesSegurasExitosas >= segurasParaDesbloquear)
         {
             riesgosDesbloqueados = true;
-            Debug.Log("°Riesgosas desbloqueadas!");
-            RefrescarInteractividadCartas(); //  habilita el botÛn Invertir de las riesgosas
+            Debug.Log("¬°Riesgosas desbloqueadas!");
+            RefrescarInteractividadCartas(); //  habilita el bot√≥n Invertir de las riesgosas
         }
     }
 
@@ -370,7 +351,7 @@ public class UIManager : MonoBehaviour
 
     public void RefrescarInteractividadCartas()
     {
-        // Incluye inactivos en la escena (por si el panel est· cerrado)
+        // Incluye inactivos en la escena (por si el panel est√° cerrado)
         var cartas = GameObject.FindObjectsOfType<CartaInversion>(true);
         foreach (var carta in cartas)
             carta.ActualizarInteractividad();
@@ -383,14 +364,13 @@ public class UIManager : MonoBehaviour
 
         JugadorFinanzas.instancia.UsarItemPorIndice(indexItemSeleccionado);
 
-        // Cierra el panel de detalles y limpia selecciÛn
-        panelDetalles.SetActive(false);
+       
         indexItemSeleccionado = -1;
     }
 
     private bool EsUsable(ItemEspacial item)
     {
-        // 1) Necesidades: solo si la barra no est· llena
+        // 1) Necesidades: solo si la barra no est√° llena
         if (item.tipo == TipoItem.Necesidad && item.efectoNecesidad > 0 && item.satisface != NecesidadTipo.Ninguna)
         {
             if (NeedsSystem.Instancia == null) return true;
@@ -401,8 +381,8 @@ public class UIManager : MonoBehaviour
         if (EventsManager.Instancia != null && EventsManager.Instancia.PuedeUsarseParaEvento(item))
             return true;
 
-        // 3) Õtems de prevenciÛn: si quieres permitir activarlos manualmente
-        if (item.tipo == TipoItem.PrevenciÛn)
+        // 3) √çtems de prevenci√≥n: si quieres permitir activarlos manualmente
+        if (item.tipo == TipoItem.Prevenci√≥n)
             return true;
 
         return false;

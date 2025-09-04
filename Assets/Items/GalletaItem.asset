@@ -20,6 +20,8 @@ MonoBehaviour:
   descripcion: 'Recupera +30 de barra de comida
 
 '
+  consumible: 1
   esSeguroNave: 0
+  tagPrevencion: 
   satisface: 1
-  efectoNecesidad: 25
+  efectoNecesidad: 30

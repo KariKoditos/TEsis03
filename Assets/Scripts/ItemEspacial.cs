@@ -19,6 +19,9 @@ public class ItemEspacial : ScriptableObject
     [Header("Prevención / Seguro")]
     public bool esSeguroNave = false;
 
+    [Header("Prevención")]
+    public string tagPrevencion;
+
     [Header("Efectos de Necesidad (solo si tipo = Necesidad)")]
     public NecesidadTipo satisface = NecesidadTipo.Ninguna;
     public int efectoNecesidad = 0;

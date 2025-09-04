@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class EventsManager : MonoBehaviour
 {
@@ -17,6 +18,10 @@ public class EventsManager : MonoBehaviour
 
     private RandomEventDef eventoActivo;
 
+    // Bus / Contratos
+    public static event Action<string> OnIncidentSpawnedRequiredTag;
+    public static event Func<ItemEspacial, bool> OnTryResolveIncidentWithItem;
+
     void Awake()
     {
         if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
@@ -25,15 +30,16 @@ public class EventsManager : MonoBehaviour
 
     void Start()
     {
-        // iniciar ciclo de eventos
-        Invoke(nameof(LanzarEventoAleatorio), Random.Range(intervaloMinSeg, intervaloMaxSeg));
+        // Iniciar ciclo de eventos aleatorios (usa Random de Unity)
+        Invoke(nameof(LanzarEventoAleatorio),
+               UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg));
     }
 
     void LanzarEventoAleatorio()
     {
         if (eventos.Count == 0) return;
 
-        eventoActivo = eventos[Random.Range(0, eventos.Count)];
+        eventoActivo = eventos[UnityEngine.Random.Range(0, eventos.Count)];
         Debug.Log($"[EVENTO] {eventoActivo.titulo} lanzado.");
 
         NotificationManager.Instancia?.Notify(
@@ -41,16 +47,17 @@ public class EventsManager : MonoBehaviour
             NotificationType.Warning
         );
 
-        // volver a agendar otro evento
-        Invoke(nameof(LanzarEventoAleatorio), Random.Range(intervaloMinSeg, intervaloMaxSeg));
+        // Volver a agendar otro evento
+        Invoke(nameof(LanzarEventoAleatorio),
+               UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg));
     }
 
-    // cuando el jugador usa un ítem, se pregunta si resuelve el evento
+    // Cuando el jugador usa un ítem, se pregunta si resuelve el evento de este sistema
     public bool OnItemUsed(ItemEspacial item)
     {
-        if (eventoActivo == null) return false;
+        if (eventoActivo == null || item == null) return false;
 
-        // caso 1: necesita ítem exacto
+        // Caso 1: requiere asset exacto
         if (eventoActivo.solucion == EventSolutionType.ItemByAsset &&
             eventoActivo.itemRequerido == item)
         {
@@ -58,7 +65,7 @@ public class EventsManager : MonoBehaviour
             return eventoActivo.consumirItemAlUsar;
         }
 
-        // caso 2: necesita tipo
+        // Caso 2: requiere tipo
         if (eventoActivo.solucion == EventSolutionType.ItemByTipo &&
             eventoActivo.tipoRequerido == item.tipo)
         {
@@ -66,7 +73,7 @@ public class EventsManager : MonoBehaviour
             return eventoActivo.consumirItemAlUsar;
         }
 
-        return false; // no resuelve nada
+        return false; // no resuelve
     }
 
     void ResolverEvento()
@@ -80,19 +87,23 @@ public class EventsManager : MonoBehaviour
 
     public bool PuedeUsarseParaEvento(ItemEspacial item)
     {
-        if (eventoActivo == null) return false;
+        if (eventoActivo == null || item == null) return false;
 
         switch (eventoActivo.solucion)
         {
             case EventSolutionType.ItemByAsset:
                 return eventoActivo.itemRequerido == item;
-
             case EventSolutionType.ItemByTipo:
                 return eventoActivo.tipoRequerido == item.tipo;
-
             default:
                 return false;
         }
     }
 
+    // ==== Bus helpers ====
+    public static void EmitIncidentSpawned(string requiredTag)
+        => OnIncidentSpawnedRequiredTag?.Invoke(requiredTag);
+
+    public static bool TryResolveIncidentWithItem(ItemEspacial item)
+        => OnTryResolveIncidentWithItem?.Invoke(item) ?? false;
 }

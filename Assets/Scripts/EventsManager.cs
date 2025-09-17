@@ -22,7 +22,7 @@ public class EventsManager : MonoBehaviour
     public static event Action<string> OnIncidentSpawnedRequiredTag;
     public static event Func<ItemEspacial, bool> OnTryResolveIncidentWithItem;
 
-    void Awake() //Singleton instancia global: EventsManager UI, finanzas, inventario usan el gestor de eventos sin referencias manuales
+    void Awake() //singleton
     {
         if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
@@ -35,11 +35,11 @@ public class EventsManager : MonoBehaviour
                UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg));
     }
 
-    void LanzarEventoAleatorio()
+    void LanzarEventoAleatorio() //gestionar el incidente
     {
-        if (eventos.Count == 0) return;
+        if (eventos.Count == 0) return; 
 
-        eventoActivo = eventos[UnityEngine.Random.Range(0, eventos.Count)];
+        eventoActivo = eventos[UnityEngine.Random.Range(0, eventos.Count)]; 
         Debug.Log($"[EVENTO] {eventoActivo.titulo} lanzado.");
 
         NotificationManager.Instancia?.Notify(
@@ -52,8 +52,8 @@ public class EventsManager : MonoBehaviour
                UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg));
     }
 
-    // checa si el item q uso si arregla el evento
-    public bool OnItemUsed(ItemEspacial item)
+    
+    public bool OnItemUsed(ItemEspacial item) //Ya con efecto resuelve el evento 
     {
         if (eventoActivo == null || item == null) return false;
 
@@ -76,7 +76,7 @@ public class EventsManager : MonoBehaviour
         return false; 
     }
 
-    void ResolverEvento()
+    void ResolverEvento() //Marca el incidente como resuelto
     {
         Debug.Log($"Evento {eventoActivo.titulo} resuelto.");
         NotificationManager.Instancia?.Notify(
@@ -85,9 +85,9 @@ public class EventsManager : MonoBehaviour
         eventoActivo = null;
     }
 
-    public bool PuedeUsarseParaEvento(ItemEspacial item)
+    public bool PuedeUsarseParaEvento(ItemEspacial item) //Verificación solo lectura
     {
-        if (eventoActivo == null || item == null) return false;
+        if (eventoActivo == null || item == null) return false; //checa si el item funciona para el evento
 
         switch (eventoActivo.solucion)
         {
@@ -101,23 +101,11 @@ public class EventsManager : MonoBehaviour
     }
 
 
-    public static void EmitIncidentSpawned(string requiredTag)
+    public static void EmitIncidentSpawned(string requiredTag) //Incidente con item que tiene tag
     {
         if (OnIncidentSpawnedRequiredTag != null)
         {
             OnIncidentSpawnedRequiredTag.Invoke(requiredTag);
-        }
-    }
-
-    public static bool TryResolveIncidentWithItem(ItemEspacial item)
-    {
-        if (OnTryResolveIncidentWithItem != null)
-        {
-            return OnTryResolveIncidentWithItem.Invoke(item);
-        }
-        else
-        {
-            return false;
         }
     }
 

@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Nuevo Item", menuName = "Items/ItemEspacial")]
+[CreateAssetMenu(fileName = "Nuevo Item", menuName = "Items/ItemEspacial")] //fabrica de datos de items
 public class ItemEspacial : ScriptableObject
 {
     public string nombre;
@@ -25,6 +26,9 @@ public class ItemEspacial : ScriptableObject
     [Header("Efectos de Necesidad (solo si tipo = Necesidad)")]
     public NecesidadTipo satisface = NecesidadTipo.Ninguna;
     public int efectoNecesidad = 0;
+
+    [Header("Efectos (Decorator)")]
+    [SerializeReference] public List<IEfectoDeItem> efectos = new List<IEfectoDeItem>(); 
 }
 
 

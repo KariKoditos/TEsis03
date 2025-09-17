@@ -168,7 +168,8 @@ public class UIManager : MonoBehaviour
 
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)
     {
-        int n = textosSlots.Length; 
+        int n = textosSlots.Length;
+
         for (int i = 0; i < n; i++)
         {
             bool hayItem = (i < inventario.Count && inventario[i] != null);
@@ -176,116 +177,129 @@ public class UIManager : MonoBehaviour
             
             if (hayItem)
             {
-                var it = inventario[i];
-                textosSlots[i].text = it.nombre;
+                ItemEspacial it = inventario[i];
+                if (textosSlots[i] != null) textosSlots[i].text = it.nombre;
 
-                iconosSlots[i].sprite = it.icono;
-                iconosSlots[i].preserveAspect = true;
-                iconosSlots[i].color = Color.white;
+                if (iconosSlots[i] != null)
+                {
+                    iconosSlots[i].sprite = it.icono;
+                    iconosSlots[i].preserveAspect = true;
+                    iconosSlots[i].color = Color.white;
+                }
             }
             else
             {
-                textosSlots[i].text = "- Vacío -";
-                iconosSlots[i].sprite = null;
-                iconosSlots[i].color = new Color(1, 1, 1, 0);
+                if (textosSlots[i] != null) textosSlots[i].text = "- Vacío -";
+                if (iconosSlots[i] != null)
+                {
+                    iconosSlots[i].sprite = null;
+                    iconosSlots[i].color = new Color(1f, 1f, 1f, 0f);
+                }
             }
 
-
-            if (i < botonesUsar.Length)
-            {
+            // Limpiar listeners previos 
+            if (i < botonesUsar.Length && botonesUsar[i] != null)
                 botonesUsar[i].onClick.RemoveAllListeners();
-            }
-            if (i < botonesVender.Length)
-            {
-                botonesVender[i].onClick.RemoveAllListeners();
-            }
 
+            if (i < botonesVender.Length && botonesVender[i] != null)
+                botonesVender[i].onClick.RemoveAllListeners();
+
+            
             if (hayItem)
             {
-               
-                if (i < botonesUsar.Length)
+                // USAR: solo si el tipo permite uso (Necesidad / Prevención)
+                if (i < botonesUsar.Length && botonesUsar[i] != null)
                 {
-                    int indexTemporal = i; 
-                    if (botonesUsar[i] != null)
-                    {
-                        if (inventario[indexTemporal].tipo == TipoItem.Necesidad || inventario[indexTemporal].tipo == TipoItem.Prevención)
-                        {
-                            botonesUsar[i].interactable = true;
+                    ItemEspacial it = inventario[i];
+                    bool sePuedeUsar = (it.tipo == TipoItem.Necesidad || it.tipo == TipoItem.Prevención);
+                    botonesUsar[i].interactable = sePuedeUsar;
 
-                            if (indexTemporal == 0)
-                            {
-                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(0));
-                            }
-                            else if (indexTemporal == 1)
-                            {
-                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(1));
-                            }
-                            else if (indexTemporal == 2)
-                            {
-                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(2));
-                            }
-                            else if (indexTemporal == 3)
-                            {
-                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(3));
-                            }
-                            else if (indexTemporal == 4)
-                            {
-                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(4));
-                            }
-                        }
-                        else
-                        {
-                            botonesUsar[i].interactable = false;
-                        }
+                    if (sePuedeUsar)
+                    {
+                        // Sin lambdas: listener por índice fijo
+                        if (i == 0) botonesUsar[i].onClick.AddListener(UsarSlot0);
+                        else if (i == 1) botonesUsar[i].onClick.AddListener(UsarSlot1);
+                        else if (i == 2) botonesUsar[i].onClick.AddListener(UsarSlot2);
+                        else if (i == 3) botonesUsar[i].onClick.AddListener(UsarSlot3);
+                        else if (i == 4) botonesUsar[i].onClick.AddListener(UsarSlot4);
                     }
                 }
 
-                if (i < botonesVender.Length)
+                // VENDER: siempre permitido si hay ítem
+                if (i < botonesVender.Length && botonesVender[i] != null)
                 {
-                    int indexTemporal = i;
-                    if (botonesVender[i] != null)
-                    {
-                        botonesVender[i].interactable = true;
+                    botonesVender[i].interactable = true;
 
-                        
-                        if (indexTemporal == 0)
-                        {
-                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(0));
-                        }
-                        else if (indexTemporal == 1)
-                        {
-                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(1));
-                        }
-                        else if (indexTemporal == 2)
-                        {
-                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(2));
-                        }
-                        else if (indexTemporal == 3)
-                        {
-                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(3));
-                        }
-                        else if (indexTemporal == 4)
-                        {
-                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(4));
-                        }
-                    }
+                    if (i == 0) botonesVender[i].onClick.AddListener(VenderSlot0);
+                    else if (i == 1) botonesVender[i].onClick.AddListener(VenderSlot1);
+                    else if (i == 2) botonesVender[i].onClick.AddListener(VenderSlot2);
+                    else if (i == 3) botonesVender[i].onClick.AddListener(VenderSlot3);
+                    else if (i == 4) botonesVender[i].onClick.AddListener(VenderSlot4);
                 }
             }
             else
             {
-                
+                // No hay ítem: deshabilitar botones
                 if (i < botonesUsar.Length && botonesUsar[i] != null)
-                {
                     botonesUsar[i].interactable = false;
-                }
+
                 if (i < botonesVender.Length && botonesVender[i] != null)
-                {
                     botonesVender[i].interactable = false;
-                }
             }
         }
     }
 
+    
+    // USAR
+    private void UsarSlot0() { EjecutarUsarCommand(0); }
+    private void UsarSlot1() { EjecutarUsarCommand(1); }
+    private void UsarSlot2() { EjecutarUsarCommand(2); }
+    private void UsarSlot3() { EjecutarUsarCommand(3); }
+    private void UsarSlot4() { EjecutarUsarCommand(4); }
+
+    // VENDER
+    private void VenderSlot0() { EjecutarVenderCommand(0); }
+    private void VenderSlot1() { EjecutarVenderCommand(1); }
+    private void VenderSlot2() { EjecutarVenderCommand(2); }
+    private void VenderSlot3() { EjecutarVenderCommand(3); }
+    private void VenderSlot4() { EjecutarVenderCommand(4); }
+
+  
+    private void EjecutarUsarCommand(int idx)
+    {
+        // encapsula la acción "Usar ítem"
+        UsarItemCommand cmd = new UsarItemCommand(idx);
+
+        if (cmd.CanExecute())
+        {
+            cmd.Execute(); // Internamente llama a JugadorFinanzas.UsarItemPorIndice(idx)  refrescamos UI para reflejar inventario/creditos actualizados
+
+            ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+            ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+        }
+        else
+        {
+            NotificationManager.Instancia?.Notify("No se puede usar ese slot.", NotificationType.Warning, 2.5f);
+        }
+    }
+
+    private void EjecutarVenderCommand(int idx)
+    {
+        //encapsula la acción "Vender ítem"
+        VenderCommand cmd = new VenderCommand(idx);
+
+        if (cmd.CanExecute())
+        {
+            cmd.Execute(); // Internamente llama a JugadorFinanzas.Vender(idx) Refrescar UI tras la venta
+
+            ActualizarInventarioUI(JugadorFinanzas.instancia.inventario);
+            ActualizarCreditos(JugadorFinanzas.instancia.creditos);
+        }
+        else
+        {
+            NotificationManager.Instancia?.Notify("No se puede vender ese slot.", NotificationType.Warning, 2.5f);
+        }
+    }
 
 
     public void VenderItem()

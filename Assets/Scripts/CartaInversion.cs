@@ -8,39 +8,40 @@ public class CartaInversion : MonoBehaviour
     [Header("UI Componentes")]
     public TMP_Text textoNombre;
     public TMP_Text textoDescripcion;
-    public TMP_Text textoGanancia;       // “Ganancia fija: +X” o “Ganancia variable…”
+    public TMP_Text textoGanancia;       
     public Button botonInvertir;
     public TMP_InputField inputCantidad;
     public Button botonConfirmar;
-    public TMP_Text textoResultado;      // OPCIONAL: feedback al jugador
+    public TMP_Text textoResultado;      
 
     [Header("UI Progreso (opcional)")]
-    
-    public Slider barraProgreso;          // Usa un Image con Fill = Filled (Radial o Horizontal)
-    
+
+    public Slider barraProgreso;          
 
     [Header("Datos de Inversión")]
     public string nombreInversion;
     public string descripcion;
-    public int gananciaBase;             // usada en inversión segura
+    public int gananciaBase;             
     public bool esRiesgosa;
 
-   
-    
-    
+    private IInvestmentStrategy _estrategia;
+
+
+
+
 
     [Header("Tiempo de inversión (editable por carta)")]
-    public bool usarRango = false;                 // Si true, usa un rango aleatorio
-    public float duracionSegundos = 3f;            // Duración fija si usarRango = false
-    public Vector2 rangoDuracionSeg = new Vector2(2f, 5f); // [min, max] si usarRango = true
+    public bool usarRango = false;                 
+    public float duracionSegundos = 3f;            
+    public Vector2 rangoDuracionSeg = new Vector2(2f, 5f); 
 
     private bool inversionEnCurso = false;
     private int cantidadPendiente = 0;
-    
+
 
     void OnEnable()
     {
-        // Inicializa visibilidad de controles
+        
         if (inputCantidad) { inputCantidad.text = ""; inputCantidad.gameObject.SetActive(false); }
         if (botonConfirmar) { botonConfirmar.gameObject.SetActive(false); botonConfirmar.interactable = true; }
         if (botonInvertir)
@@ -51,15 +52,24 @@ public class CartaInversion : MonoBehaviour
             botonInvertir.interactable = true;
         }
 
-        // Progreso oculto al inicio
-        if (barraProgreso) 
-        { 
-            barraProgreso.value = 0f;  barraProgreso.gameObject.SetActive(false); 
+        
+        if (barraProgreso)
+        {
+            barraProgreso.value = 0f; barraProgreso.gameObject.SetActive(false);
+        }
+
+        if (esRiesgosa)
+        {
+            
+            _estrategia = new InversionRiesgosaStrategy(-0.10f, 0.20f); //strategy
+        }
+        else
+        {
+            
+            _estrategia = new InversionSeguraStrategy(gananciaBase);
         }
 
         
-
-        // Refresca textos
         if (textoNombre) textoNombre.text = nombreInversion;
         if (textoDescripcion) textoDescripcion.text = descripcion;
         if (textoGanancia)
@@ -68,7 +78,7 @@ public class CartaInversion : MonoBehaviour
                 : $"Ganancia fija: +{gananciaBase}";
         if (textoResultado) textoResultado.text = "";
 
-        // Habilitar/Deshabilitar botón según desbloqueo
+        
         ActualizarInteractividad();
     }
 
@@ -82,10 +92,14 @@ public class CartaInversion : MonoBehaviour
 
         if (textoNombre) textoNombre.text = nombreInversion;
         if (textoDescripcion) textoDescripcion.text = descripcion;
-        if (textoGanancia)
-            textoGanancia.text = esRiesgosa
-                ? "Ganancia variable (riesgosa)"
-                : $"Ganancia fija: +{gananciaBase}";
+        if (esRiesgosa)
+        {
+            textoGanancia.text = "Ganancia variable (riesgosa)";
+        }
+        else
+        {
+            textoGanancia.text = "Ganancia fija: +" + gananciaBase;
+        };
     }
 
     public void ActualizarInteractividad()
@@ -191,12 +205,12 @@ public class CartaInversion : MonoBehaviour
         if (botonInvertir) botonInvertir.interactable = false;
 
         // Mostrar progreso
-        if (barraProgreso) 
+        if (barraProgreso)
         {
             barraProgreso.gameObject.SetActive(true); barraProgreso.value = 0f;
 
         }
-        
+
 
         float t = 0f;
         while (t < duracion)
@@ -204,13 +218,13 @@ public class CartaInversion : MonoBehaviour
             t += Time.unscaledDeltaTime; // usa unscaled por si pausas el juego con timeScale
             float p = Mathf.Clamp01(t / duracion);
             if (barraProgreso) barraProgreso.value = p;
-            
+
             yield return null;
         }
 
         // Ocultar progreso
         if (barraProgreso) barraProgreso.gameObject.SetActive(false);
-        
+
 
         // Calcular resultado al final de la espera
         ResolverInversion(cantidadPendiente);
@@ -227,30 +241,25 @@ public class CartaInversion : MonoBehaviour
 
     void ResolverInversion(int cantidad)
     {
-        if (esRiesgosa)
+        // Retorno variable según estrategia
+        int delta = _estrategia.CalcularRetorno(cantidad);
+        int retornoTotal = cantidad + delta;  
+
+        if (retornoTotal <= 0)
         {
-            // 50% pierde todo, 50% gana (2x a 4x)
-            bool gano = Random.value < 0.5f;
-            if (!gano)
-            {
-                MostrarResultado($"Invertiste {cantidad} y perdiste todo. ");
-            }
-            else
-            {
-                int multiplicador = Random.Range(2, 5); // 2,3,4 (max exclusivo en enteros)
-                int retorno = cantidad * multiplicador;
-                UIManager.instancia.AgregarCreditos(retorno);
-                MostrarResultado($"¡Ganaste! Retorno: {retorno} (x{multiplicador}). ");
-            }
+            //pérdida total 
+            MostrarResultado($"Invertiste {cantidad} y no obtuviste retorno.");
         }
         else
         {
-            int retorno = cantidad + Mathf.Max(0, gananciaBase);
-            UIManager.instancia.AgregarCreditos(retorno);
-            UIManager.instancia.RegistrarInversionSeguraExitosa();
-            MostrarResultado($"Inversión segura exitosa. Retorno: {retorno} (+{gananciaBase}). ");
+            UIManager.instancia.AgregarCreditos(retornoTotal);
+            MostrarResultado($"Retorno: {retornoTotal} ({_estrategia.Nombre}).");
+        }
 
-            // Por si se desbloquean las riesgosas justo ahora:
+        // Lógica de progresión 
+        if (!esRiesgosa && delta > 0)
+        {
+            UIManager.instancia.RegistrarInversionSeguraExitosa();
             UIManager.instancia.RefrescarInteractividadCartas();
         }
     }
@@ -260,4 +269,6 @@ public class CartaInversion : MonoBehaviour
         if (textoResultado) textoResultado.text = msg;
         else Debug.Log(msg);
     }
+
+ 
 }

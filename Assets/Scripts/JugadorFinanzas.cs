@@ -220,30 +220,40 @@ public class JugadorFinanzas : MonoBehaviour
         {
             NeedsSystem.Instancia.AplicarEfecto(item.satisface, item.efectoNecesidad);
         }
-
-       
-        bool resuelto = false;
-
-        
-        if (EventsManager.Instancia != null)
+        var ctx = new EfectoContexto
         {
-            // Devuelve true si resolvió 
-            resuelto |= EventsManager.Instancia.OnItemUsed(item);
+            finanzas = this,
+            needs = NeedsSystem.Instancia,
+            eventos = EventsManager.Instancia,
+            itemFuente = item,
+            usuarioGO = this.gameObject
+        };
+
+
+
+        if (item.efectos != null)
+        {
+            for (int i = 0; i < item.efectos.Count; i++)
+            {
+                var ef = item.efectos[i];
+                if (ef != null) ef.Aplicar(ctx);
+            }
         }
 
+        // 3) Intento de resolver evento con on item used
+        bool resuelto = false;
         if (EventsManager.Instancia != null)
         {
             resuelto = EventsManager.Instancia.OnItemUsed(item);
         }
 
-        //quita el item del inventario
         inventario.RemoveAt(index);
         UIManager.instancia?.ActualizarInventarioUI(inventario);
 
         NotificationManager.Instancia?.Notify($"Usaste {item.nombre}.", NotificationType.Info, 2f);
     }
 
-    // ================== Vender (suma a CRÉDITOS) ==================
+    
     public void Vender(int index)
     {
         if (index < 0 || index >= inventario.Count) return;

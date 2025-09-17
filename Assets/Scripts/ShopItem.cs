@@ -18,16 +18,24 @@ public class ShopItem : MonoBehaviour
     public void Setup(ItemEspacial data, Action<ItemEspacial> onBuy)
     {
         item = data;
-        
+        this.onBuy = onBuy;
 
         if (icono) icono.sprite = data.icono;
         if (textoNombre) textoNombre.text = data.nombre;
         if (textoDescripcion) textoDescripcion.text = data.descripcion;
-        if (textoCosto) textoCosto.text = $"${data.costo}";
+        if (textoCosto) textoCosto.text = "$" + data.costo;
 
         botonComprar.onClick.RemoveAllListeners();
-        botonComprar.onClick.AddListener(() => onBuy?.Invoke(item));
+        botonComprar.onClick.AddListener(() =>
+        {
+            var cmd = new ComprarCommand(item, item.costo);
+            if (cmd.CanExecute())
+            {
+                cmd.Execute();
 
+                onBuy?.Invoke(item);
+            }
+        });
 
         gameObject.SetActive(true);
         ActualizarInteractividad();

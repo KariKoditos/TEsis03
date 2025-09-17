@@ -155,7 +155,7 @@ public class NeedsSystem : MonoBehaviour
         {
             flag = true;
 
-            // texto amigable + sugerencia rápida
+            
             string sugerencia = t switch
             {
                 NeedType.Comida => "Compra/usa comida.",
@@ -170,7 +170,7 @@ public class NeedsSystem : MonoBehaviour
             );
         }
 
-        // si recupera por encima del umbral + offset, permitimos volver a alertar en el futuro
+        
         if (flag && v >= umbralAlerta + resetAlertaOffset)
             flag = false;
     }

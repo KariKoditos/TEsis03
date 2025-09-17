@@ -26,18 +26,18 @@ public class TiendaEspacial : MonoBehaviour
 
     [Header("UI Scroll (Tienda Completa)")]
     [Tooltip("Asigna el Content del ScrollView (no el Viewport).")]
-    public Transform scrollContent;                   // Content del ScrollRect para la tienda "completa"
+    public Transform scrollContent;                  
     [Tooltip("Prefab de la tarjeta (debe tener componente ShopItem).")]
     public GameObject prefabShopItem;
 
     [Header("Economía dinámica (por compras)")]
     [Tooltip("Cada compra del mismo ítem añade este costo extra permanente.")]
-    public int inflacionPorCompra = 5;                // +5 créditos por compra del MISMO ítem
-    public int inflacionTopeExtra = 200;              // tope máximo de incremento por compras
+    public int inflacionPorCompra = 5;                
+    public int inflacionTopeExtra = 200;             
 
-    // libro de compras por ítem (clave = asset original)
+    
     private readonly Dictionary<ItemEspacial, int> comprasPorItem = new Dictionary<ItemEspacial, int>();
-    // índice para mapear la copia mostrada (por nombre) al asset original (para cobrar bien)
+
     private readonly Dictionary<string, ItemEspacial> originalPorNombre = new Dictionary<string, ItemEspacial>();
 
     // Rotación clásica (copias)
@@ -51,7 +51,7 @@ public class TiendaEspacial : MonoBehaviour
             Debug.Log($"TiendaEspacial: cargados {poolDeItems.Length} ítems desde Resources/Items");
         }
 
-        // Construir índice por nombre (asume nombres únicos)
+       
         originalPorNombre.Clear();
         foreach (var it in poolDeItems)
             if (it && !originalPorNombre.ContainsKey(it.nombre))
@@ -59,26 +59,25 @@ public class TiendaEspacial : MonoBehaviour
 
         
 
-        // Inflación temporal (rotación clásica)
+        // Inflación temporal 
         if (inflacionEnTiempoReal) StartCoroutine(InflacionRealtime());
         else InvokeRepeating(nameof(AplicarInflacion), tiempoInflacion, tiempoInflacion);
     }
 
-    // ---------- Abrir / Cerrar ----------
+    
     public void AbrirTienda()
     {
         if (scrollContent && prefabShopItem)
             PoblarTiendaCompleta();
 
         UIManager.instancia.MostrarTienda();
-        Time.timeScale = 0;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         if (controladorJugador) controladorJugador.habilitarMovimiento = false;
 
         UIManager.instancia.ActualizarCreditos(JugadorFinanzas.instancia.creditos);
 
-        // Evitar NRE cuando no usas el modo clásico
+      
         if (slots != null && slots.Length > 0)
             RefrescarUI();
     }
@@ -92,7 +91,7 @@ public class TiendaEspacial : MonoBehaviour
         if (controladorJugador) controladorJugador.habilitarMovimiento = true;
     }
 
-    // ---------- Rotación clásica (opcional) ----------
+    
     public void RotarItems()
     {
         if (poolDeItems == null || poolDeItems.Length == 0) return;
@@ -115,7 +114,6 @@ public class TiendaEspacial : MonoBehaviour
             if (!usados.Contains(pick)) { seleccion.Add(pick); usados.Add(pick); }
         }
 
-        // copias para no mutar assets
         itemsEnVenta = new ItemEspacial[seleccion.Count];
         for (int i = 0; i < seleccion.Count; i++)
             itemsEnVenta[i] = ScriptableObject.Instantiate(seleccion[i]);
@@ -139,7 +137,7 @@ public class TiendaEspacial : MonoBehaviour
         for (int i = 0; i < slots.Length; i++)
         {
             var s = slots[i];
-            if (s == null) continue;  // <- evita NRE si hay Missing
+            if (s == null) continue;  
 
             var it = (itemsEnVenta.Length > 0) ? itemsEnVenta[i % itemsEnVenta.Length] : null;
             if (it != null) s.Setup(it, OnClickComprarSlot);
@@ -149,7 +147,7 @@ public class TiendaEspacial : MonoBehaviour
 
     void OnClickComprarSlot(ItemEspacial item)
     {
-        // compra de la rotación clásica: usa item.costo del item copiado
+        
         if (JugadorFinanzas.instancia.Comprar(item, item.costo))
         {
             foreach (var s in slots) s.ActualizarInteractividad();
@@ -178,7 +176,7 @@ public class TiendaEspacial : MonoBehaviour
         Debug.Log($"TiendaEspacial: inflación +{incrementoPorciento}% aplicada a la rotación actual.");
     }
 
-    // ---------- Tienda completa (scroll con TODO el catálogo) ----------
+ 
     public void PoblarTiendaCompleta()
     {
         if (!scrollContent || !prefabShopItem)
@@ -187,29 +185,29 @@ public class TiendaEspacial : MonoBehaviour
             return;
         }
 
-        // Limpiar Content
+        
         for (int i = scrollContent.childCount - 1; i >= 0; i--)
             Destroy(scrollContent.GetChild(i).gameObject);
 
-        // Crear una card por cada item disponible en el pool
+        
         foreach (var original in poolDeItems)
         {
             if (!original) continue;
 
-            // calcular precio dinámico por compras acumuladas del original
+            
             int precio = GetPrecioConInflacion(original);
 
-            // Crear COPIA para mostrar el precio visible sin mutar el asset
+            
             var copia = ScriptableObject.Instantiate(original);
             copia.costo = precio;
 
             var go = Instantiate(prefabShopItem, scrollContent);
             var card = go.GetComponent<ShopItem>();
-            card.Setup(copia, OnComprarClickScroll); // firma: (ItemEspacial, Action<ItemEspacial>)
+            card.Setup(copia, OnComprarClickScroll); 
         }
     }
 
-    // Callback del botón Comprar en cada card del scroll
+    
     void OnComprarClickScroll(ItemEspacial itemCopiaMostrada)
     {
         if (itemCopiaMostrada == null) return;

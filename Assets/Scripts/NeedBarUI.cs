@@ -11,10 +11,9 @@ public class NeedBarUI : MonoBehaviour
 
     void Start()
     {
-        IntentarSuscribir();
-        // fuerza valor inicial aunque el evento aún no haya disparado
-        if (NeedsSystem.Instancia != null)
-            ActualizarVisual(NeedsSystem.Instancia.GetValor(tipo));
+        IntentarSuscribir(); //actualizar  barra UI
+
+        if (NeedsSystem.Instancia != null) ActualizarVisual(NeedsSystem.Instancia.GetValor(tipo)); 
     }
 
     void OnEnable()
@@ -35,9 +34,7 @@ public class NeedBarUI : MonoBehaviour
     {
         if (!_subscrito) IntentarSuscribir();
 
-        // Plan B: mientras no haya suscripción, sincroniza visual
-        if (NeedsSystem.Instancia != null && !_subscrito)
-            ActualizarVisual(NeedsSystem.Instancia.GetValor(tipo));
+        if (NeedsSystem.Instancia != null && !_subscrito) ActualizarVisual(NeedsSystem.Instancia.GetValor(tipo));
     }
 
     void IntentarSuscribir()
@@ -51,7 +48,7 @@ public class NeedBarUI : MonoBehaviour
 
     void OnNeedChanged(NeedType t, int valor)
     {
-        if (t != tipo) return;
+        if (t != tipo) return; 
         ActualizarVisual(valor);
     }
 
@@ -65,7 +62,6 @@ public class NeedBarUI : MonoBehaviour
             slider.maxValue = 200;
             slider.value = valor;
         }
-
 
 
     }

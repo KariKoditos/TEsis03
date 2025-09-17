@@ -37,7 +37,6 @@ public class JugadorFinanzas : MonoBehaviour
     [SerializeField] float intervaloAhorroSegundos = 60f;
     int ultimoAhorroNotificado = -1;
 
-    // Corrutinas
     Coroutine rutinaAhorroNotif;
     Coroutine rutinaInteres;
 
@@ -76,15 +75,14 @@ public class JugadorFinanzas : MonoBehaviour
             rutinaInteres = null;
         }
     }
+    
 
-    // ================== Créditos helpers ==================
     public void AgregarCreditos(int cantidad)
     {
         if (cantidad == 0) return;
         creditos = Mathf.Max(0, creditos + cantidad);
         UIManager.instancia?.ActualizarCreditos(creditos);
-        // (opcional) Game Over por créditos <= 0, si tu juego lo maneja
-        // if (creditos <= 0) GameOverUI.TriggerGameOver();
+        
     }
 
     public bool TryGastarCreditos(int monto)
@@ -95,13 +93,12 @@ public class JugadorFinanzas : MonoBehaviour
         creditos -= monto;
         UIManager.instancia?.ActualizarCreditos(creditos);
 
-        // (opcional) Game Over por créditos <= 0, si tu juego lo maneja
-        // if (creditos <= 0) GameOverUI.TriggerGameOver();
+      
 
         return true;
     }
 
-    // ================== Ahorro ==================
+    
     public void Depositar(int cantidad)
     {
         if (cantidad <= 0) return;
@@ -196,7 +193,7 @@ public class JugadorFinanzas : MonoBehaviour
         inventario.Add(copia);
 
         UIManager.instancia?.ActualizarInventarioUI(inventario);
-       // NotificationManager.Instancia?.Notify($"Compraste: {item.nombre}.", NotificationType.Success, 2f);
+       
 
         hizoCompra = true;
         VerificarDesbloqueoInversiones();
@@ -209,14 +206,14 @@ public class JugadorFinanzas : MonoBehaviour
         return Comprar(item, item.costo);
     }
 
-    // ================== Usar ==================
+    
     public void UsarItemPorIndice(int index)
     {
         if (index < 0 || index >= inventario.Count) return;
 
         var item = inventario[index];
 
-        // 1) Efecto sobre necesidades (usa tu NeedsSystem actual)
+        // 1) Efecto sobre necesidades 
         if (item.satisface != NecesidadTipo.Ninguna &&
             item.efectoNecesidad > 0 &&
             NeedsSystem.Instancia != null)
@@ -224,13 +221,13 @@ public class JugadorFinanzas : MonoBehaviour
             NeedsSystem.Instancia.AplicarEfecto(item.satisface, item.efectoNecesidad);
         }
 
-        // 2) Prevención / incidentes (compatibilidad con ambos managers)
+       
         bool resuelto = false;
 
-        // EventsManager (tu sistema nuevo)
+        
         if (EventsManager.Instancia != null)
         {
-            // Devuelve true si resolvió y, según def, puede consumir
+            // Devuelve true si resolvió 
             resuelto |= EventsManager.Instancia.OnItemUsed(item);
         }
 
@@ -239,7 +236,7 @@ public class JugadorFinanzas : MonoBehaviour
             resuelto = EventsManager.Instancia.OnItemUsed(item);
         }
 
-        // 3) Consumir al usar (como acordamos)
+        //quita el item del inventario
         inventario.RemoveAt(index);
         UIManager.instancia?.ActualizarInventarioUI(inventario);
 
@@ -291,7 +288,7 @@ public class JugadorFinanzas : MonoBehaviour
         {
             inversionesRiesgosasDesbloqueadas = true;
             Debug.Log("Inversiones riesgosas desbloqueadas");
-            // Aquí puedes disparar UI si quieres
+            
         }
     }
 }

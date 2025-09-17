@@ -15,9 +15,9 @@ public class UIManager : MonoBehaviour
     [Header("Inventario")]
     public GameObject panelInventario;
     public TMP_Text[] textosSlots;
-    public UnityEngine.UI.Image[] iconosSlots;  // tamaño 5
-    public UnityEngine.UI.Button[] botonesUsar;   // tamaño 5
-    public UnityEngine.UI.Button[] botonesVender; // tamaño 5
+    public UnityEngine.UI.Image[] iconosSlots;  
+    public UnityEngine.UI.Button[] botonesUsar;   
+    public UnityEngine.UI.Button[] botonesVender; 
     
 
     [Header("Detalles de Item")]
@@ -126,15 +126,15 @@ public class UIManager : MonoBehaviour
         panelNotificaciones.SetActive(true);
         abierto = true;
 
-        // activar cursor
+       
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // bloquear movimiento
+        
         if (controladorJugador != null)
             controladorJugador.habilitarMovimiento = false;
 
-        // opcional: pausar juego
+       
         Time.timeScale = 0f;
     }
 
@@ -168,12 +168,12 @@ public class UIManager : MonoBehaviour
 
     public void ActualizarInventarioUI(List<ItemEspacial> inventario)
     {
-        int n = textosSlots.Length; // asume 5
+        int n = textosSlots.Length; 
         for (int i = 0; i < n; i++)
         {
             bool hayItem = (i < inventario.Count && inventario[i] != null);
 
-            // Pintar nombre + icono
+            
             if (hayItem)
             {
                 var it = inventario[i];
@@ -190,39 +190,103 @@ public class UIManager : MonoBehaviour
                 iconosSlots[i].color = new Color(1, 1, 1, 0);
             }
 
-            // Asegurar listeners correctos
-            if (i < botonesUsar.Length) botonesUsar[i].onClick.RemoveAllListeners();
-            if (i < botonesVender.Length) botonesVender[i].onClick.RemoveAllListeners();
+
+            if (i < botonesUsar.Length)
+            {
+                botonesUsar[i].onClick.RemoveAllListeners();
+            }
+            if (i < botonesVender.Length)
+            {
+                botonesVender[i].onClick.RemoveAllListeners();
+            }
 
             if (hayItem)
             {
-                int idx = i;
-                var it = inventario[idx];
-
-                if (i < botonesUsar.Length && botonesUsar[i])
+               
+                if (i < botonesUsar.Length)
                 {
-                    botonesUsar[i].onClick.AddListener(() =>
-                        JugadorFinanzas.instancia.UsarItemPorIndice(idx));
-                    bool sePuedeUsar = it.tipo == TipoItem.Necesidad || it.tipo == TipoItem.Prevención;
-                    botonesUsar[i].interactable = sePuedeUsar;
+                    int indexTemporal = i; 
+                    if (botonesUsar[i] != null)
+                    {
+                        if (inventario[indexTemporal].tipo == TipoItem.Necesidad || inventario[indexTemporal].tipo == TipoItem.Prevención)
+                        {
+                            botonesUsar[i].interactable = true;
+
+                            if (indexTemporal == 0)
+                            {
+                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(0));
+                            }
+                            else if (indexTemporal == 1)
+                            {
+                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(1));
+                            }
+                            else if (indexTemporal == 2)
+                            {
+                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(2));
+                            }
+                            else if (indexTemporal == 3)
+                            {
+                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(3));
+                            }
+                            else if (indexTemporal == 4)
+                            {
+                                botonesUsar[i].onClick.AddListener(() => JugadorFinanzas.instancia.UsarItemPorIndice(4));
+                            }
+                        }
+                        else
+                        {
+                            botonesUsar[i].interactable = false;
+                        }
+                    }
                 }
 
-                if (i < botonesVender.Length && botonesVender[i])
+                if (i < botonesVender.Length)
                 {
-                    botonesVender[i].onClick.AddListener(() =>
-                        JugadorFinanzas.instancia.Vender(idx));
-                    botonesVender[i].interactable = true;
+                    int indexTemporal = i;
+                    if (botonesVender[i] != null)
+                    {
+                        botonesVender[i].interactable = true;
+
+                        
+                        if (indexTemporal == 0)
+                        {
+                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(0));
+                        }
+                        else if (indexTemporal == 1)
+                        {
+                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(1));
+                        }
+                        else if (indexTemporal == 2)
+                        {
+                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(2));
+                        }
+                        else if (indexTemporal == 3)
+                        {
+                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(3));
+                        }
+                        else if (indexTemporal == 4)
+                        {
+                            botonesVender[i].onClick.AddListener(() => JugadorFinanzas.instancia.Vender(4));
+                        }
+                    }
                 }
             }
             else
             {
-                if (i < botonesUsar.Length && botonesUsar[i]) botonesUsar[i].interactable = false;
-                if (i < botonesVender.Length && botonesVender[i]) botonesVender[i].interactable = false;
+                
+                if (i < botonesUsar.Length && botonesUsar[i] != null)
+                {
+                    botonesUsar[i].interactable = false;
+                }
+                if (i < botonesVender.Length && botonesVender[i] != null)
+                {
+                    botonesVender[i].interactable = false;
+                }
             }
         }
     }
 
-  
+
 
     public void VenderItem()
     {
@@ -237,17 +301,14 @@ public class UIManager : MonoBehaviour
 
     public void ActualizarCreditos(int cantidad)
     {
-        if (textoCreditos != null)
-            textoCreditos.text = $"CRÉDITOS: {cantidad}";
-        
-        // if (textoCreditosAhorro != null) textoCreditosAhorro.text = $"CRÉDITOS: {cantidad}";
+        if (textoCreditos != null)  textoCreditos.text = $"CRÉDITOS: {cantidad}";
+
     }
 
     public void ActualizarAhorro(int cantidad)
     {
-        if (textoAhorro != null)
-            textoAhorro.text = $"AHORRO: {cantidad}";
-       
+        if (textoAhorro != null) textoAhorro.text = $"AHORRO: {cantidad}";
+
     }
 
     public void DepositarDesdeUI()
@@ -379,10 +440,6 @@ public class UIManager : MonoBehaviour
 
         // 2) Si hay un evento activo que se resuelve con este item o su tipo
         if (EventsManager.Instancia != null && EventsManager.Instancia.PuedeUsarseParaEvento(item))
-            return true;
-
-        // 3) Ítems de prevención: si quieres permitir activarlos manualmente
-        if (item.tipo == TipoItem.Prevención)
             return true;
 
         return false;

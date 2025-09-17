@@ -22,7 +22,7 @@ public class EventsManager : MonoBehaviour
     public static event Action<string> OnIncidentSpawnedRequiredTag;
     public static event Func<ItemEspacial, bool> OnTryResolveIncidentWithItem;
 
-    void Awake()
+    void Awake() //Singleton instancia global: EventsManager UI, finanzas, inventario usan el gestor de eventos sin referencias manuales
     {
         if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
@@ -52,7 +52,7 @@ public class EventsManager : MonoBehaviour
                UnityEngine.Random.Range(intervaloMinSeg, intervaloMaxSeg));
     }
 
-    // Cuando el jugador usa un ítem, se pregunta si resuelve el evento de este sistema
+    // checa si el item q uso si arregla el evento
     public bool OnItemUsed(ItemEspacial item)
     {
         if (eventoActivo == null || item == null) return false;
@@ -73,7 +73,7 @@ public class EventsManager : MonoBehaviour
             return eventoActivo.consumirItemAlUsar;
         }
 
-        return false; // no resuelve
+        return false; 
     }
 
     void ResolverEvento()
@@ -100,10 +100,25 @@ public class EventsManager : MonoBehaviour
         }
     }
 
-    // ==== Bus helpers ====
+
     public static void EmitIncidentSpawned(string requiredTag)
-        => OnIncidentSpawnedRequiredTag?.Invoke(requiredTag);
+    {
+        if (OnIncidentSpawnedRequiredTag != null)
+        {
+            OnIncidentSpawnedRequiredTag.Invoke(requiredTag);
+        }
+    }
 
     public static bool TryResolveIncidentWithItem(ItemEspacial item)
-        => OnTryResolveIncidentWithItem?.Invoke(item) ?? false;
+    {
+        if (OnTryResolveIncidentWithItem != null)
+        {
+            return OnTryResolveIncidentWithItem.Invoke(item);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 }
